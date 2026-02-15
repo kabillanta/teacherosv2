@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import Layout from "@/components/Layout";
 import { motion } from "framer-motion";
 import { Zap, BookOpen, BarChart3, Bell, ArrowRight, Quote, User, Edit2, Check, Plus, AlertCircle } from "lucide-react";
@@ -19,9 +19,18 @@ export default function Home() {
   const [nextClass, setNextClass] = useState<ClassSession | null>(null);
   const [topicInput, setTopicInput] = useState("");
   const [isAddingTopic, setIsAddingTopic] = useState(false);
+  const [user, setUser] = useState({ name: "Teacher" });
+  const [, setLocation] = useLocation();
 
-  // Simulate fetching the "Next Class" from the profile timetable
+  // Check Onboarding & Load Data
   useEffect(() => {
+    const userStr = localStorage.getItem("teacherOS_user");
+    if (!userStr) {
+        setLocation("/onboarding");
+        return;
+    }
+    setUser(JSON.parse(userStr));
+
     const saved = localStorage.getItem("teacherOS_timetable");
     if (saved) {
       const schedule: ClassSession[] = JSON.parse(saved);
@@ -85,7 +94,7 @@ export default function Home() {
             <h1 className="text-3xl font-serif text-stone-900 leading-none">Good Morning,</h1>
             <Link href="/profile">
                <div className="flex items-center gap-2 cursor-pointer group">
-                  <p className="text-stone-500 font-sans text-base group-hover:text-stone-700 transition-colors">Priya Sharma</p>
+                  <p className="text-stone-500 font-sans text-base group-hover:text-stone-700 transition-colors">{user.name}</p>
                   <User className="w-4 h-4 text-stone-400 group-hover:text-stone-600" />
                </div>
             </Link>

@@ -9,11 +9,13 @@ import Crisis from "@/pages/Crisis";
 import Prep from "@/pages/Prep";
 import Reflect from "@/pages/Reflect";
 import Profile from "@/pages/Profile";
+import Onboarding from "@/pages/Onboarding";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home}/>
+      <Route path="/onboarding" component={Onboarding}/>
       <Route path="/crisis" component={Crisis}/>
       <Route path="/prep" component={Prep}/>
       <Route path="/reflect" component={Reflect}/>
