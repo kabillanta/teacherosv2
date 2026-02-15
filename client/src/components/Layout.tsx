@@ -19,7 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-[#FDFCF8]/95 backdrop-blur-md border-t border-stone-200 px-6 py-4 pb-8 safe-area-bottom z-50 w-full md:max-w-md mx-auto">
-        <div className="flex justify-between items-end">
+        <div className="flex justify-between items-center">
           {navItems.map((item) => {
             const isActive = location === item.path;
             const Icon = item.icon;
