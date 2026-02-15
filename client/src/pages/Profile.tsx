@@ -32,7 +32,7 @@ export default function Profile() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingClass, setIsAddingClass] = useState(false);
-  const [newClass, setNewClass] = useState({ time: "", className: "", section: "", subject: "" });
+  const [newClass, setNewClass] = useState({ time: "", className: "", section: "", subject: "", topic: "" });
 
   // Load from local storage on mount
   useEffect(() => {
@@ -74,7 +74,7 @@ export default function Profile() {
     // Sort by time
     const updated = [...timetable, session].sort((a, b) => a.time.localeCompare(b.time));
     setTimetable(updated);
-    setNewClass({ time: "", className: "", section: "", subject: "" });
+    setNewClass({ time: "", className: "", section: "", subject: "", topic: "" });
     setIsAddingClass(false);
   };
 
@@ -221,6 +221,15 @@ export default function Profile() {
                            <ChevronRight className="w-4 h-4 rotate-90" />
                          </div>
                        </div>
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Topic (Optional)</label>
+                       <input 
+                         placeholder="e.g. Photosynthesis"
+                         className="w-full p-4 bg-white border border-stone-200 rounded-xl font-medium text-stone-900 focus:outline-none focus:border-stone-900 transition-colors"
+                         value={newClass.topic}
+                         onChange={(e) => setNewClass({...newClass, topic: e.target.value})}
+                       />
                     </div>
                     <button 
                       onClick={addClass}
