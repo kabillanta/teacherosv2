@@ -1,12 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, ThumbsUp, ThumbsDown, Meh, TrendingUp, Calendar } from "lucide-react";
+import { ArrowLeft, Check, ThumbsUp, ThumbsDown, Meh, TrendingUp, Calendar, ChevronDown } from "lucide-react";
 import { Link } from "wouter";
+
+type ClassSession = {
+  id: string;
+  time: string;
+  className: string;
+  subject: string;
+  topic?: string;
+};
 
 export default function Reflect() {
   const [submitted, setSubmitted] = useState(false);
   const [energy, setEnergy] = useState<number | null>(null);
+  const [recentClasses, setRecentClasses] = useState<ClassSession[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("teacherOS_timetable");
+    if (saved) {
+      const schedule: ClassSession[] = JSON.parse(saved);
+      // In a real app, we'd filter for classes that JUST ended.
+      // For prototype, we'll just show the schedule.
+      setRecentClasses(schedule);
+      if (schedule.length > 0) {
+          setSelectedClassId(schedule[0].id);
+      }
+    }
+  }, []);
+
+  const selectedClass = recentClasses.find(c => c.id === selectedClassId);
 
   return (
     <Layout>
@@ -31,9 +56,31 @@ export default function Reflect() {
             animate={{ opacity: 1 }}
             className="space-y-10"
           >
-            <div className="space-y-2">
-               <h2 className="text-xl font-serif text-stone-900">How was the energy in Class 8?</h2>
-               <p className="text-stone-500">Be honest. It helps the algorithm.</p>
+            {/* Dynamic Class Selection */}
+            <div className="space-y-3">
+               <h2 className="text-xl font-serif text-stone-900 leading-tight">
+                   How did your <br/>
+                   <div className="relative inline-block mt-2">
+                     <select 
+                        className="appearance-none bg-stone-100 border-b-2 border-stone-800 text-stone-900 font-bold py-1 pl-3 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500/20"
+                        value={selectedClassId || ""}
+                        onChange={(e) => setSelectedClassId(e.target.value)}
+                     >
+                        {recentClasses.length > 0 ? (
+                            recentClasses.map(c => (
+                                <option key={c.id} value={c.id}>{c.subject} ({c.className})</option>
+                            ))
+                        ) : (
+                            <option>Class</option>
+                        )}
+                     </select>
+                     <ChevronDown className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-stone-500" />
+                   </div>
+                   <br/> <span className="mt-2 block">lesson go?</span>
+               </h2>
+               {selectedClass?.topic && (
+                   <p className="text-stone-500 text-sm italic">Topic: {selectedClass.topic}</p>
+               )}
             </div>
 
             {/* Energy Selector - Minimalist */}
@@ -81,7 +128,8 @@ export default function Reflect() {
 
             <button 
               onClick={() => setSubmitted(true)}
-              className="w-full py-4 rounded-lg bg-stone-900 text-white font-medium text-lg shadow-xl shadow-stone-900/10 hover:bg-stone-800 transition-all active:scale-[0.98]"
+              disabled={energy === null}
+              className="w-full py-4 rounded-lg bg-stone-900 text-white font-medium text-lg shadow-xl shadow-stone-900/10 hover:bg-stone-800 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Save Entry
             </button>
@@ -98,7 +146,8 @@ export default function Reflect() {
             
             <h2 className="text-3xl font-serif text-stone-900 mb-2">Logged.</h2>
             <p className="text-stone-500 text-center mb-12">
-              That's 4 reflections this week. Consistent reflection is the #1 driver of teacher growth.
+              Insight saved for <span className="font-bold text-stone-800">{selectedClass?.subject}</span>.
+              <br/>Consistent reflection is the #1 driver of teacher growth.
             </p>
             
             <div className="w-full bg-white p-6 rounded-2xl border border-stone-200 shadow-sm mb-8">
