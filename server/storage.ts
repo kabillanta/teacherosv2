@@ -1,38 +1,79 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import {
+  teacherProfiles, timetableSessions, reflections,
+  type TeacherProfile, type InsertTeacherProfile,
+  type TimetableSession, type InsertTimetableSession,
+  type Reflection, type InsertReflection,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getProfile(userId: string): Promise<TeacherProfile | undefined>;
+  upsertProfile(profile: InsertTeacherProfile): Promise<TeacherProfile>;
+
+  getTimetable(userId: string): Promise<TimetableSession[]>;
+  addSession(session: InsertTimetableSession): Promise<TimetableSession>;
+  updateSession(id: number, userId: string, data: Partial<InsertTimetableSession>): Promise<TimetableSession | undefined>;
+  deleteSession(id: number, userId: string): Promise<void>;
+
+  getReflections(userId: string): Promise<Reflection[]>;
+  addReflection(reflection: InsertReflection): Promise<Reflection>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
+export class DatabaseStorage implements IStorage {
+  async getProfile(userId: string): Promise<TeacherProfile | undefined> {
+    const [profile] = await db.select().from(teacherProfiles).where(eq(teacherProfiles.userId, userId));
+    return profile;
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async upsertProfile(profile: InsertTeacherProfile): Promise<TeacherProfile> {
+    const [result] = await db
+      .insert(teacherProfiles)
+      .values(profile)
+      .onConflictDoUpdate({
+        target: teacherProfiles.userId,
+        set: {
+          name: profile.name,
+          schoolType: profile.schoolType,
+          subjects: profile.subjects,
+          classes: profile.classes,
+          resources: profile.resources,
+        },
+      })
+      .returning();
+    return result;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async getTimetable(userId: string): Promise<TimetableSession[]> {
+    return db.select().from(timetableSessions).where(eq(timetableSessions.userId, userId));
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async addSession(session: InsertTimetableSession): Promise<TimetableSession> {
+    const [result] = await db.insert(timetableSessions).values(session).returning();
+    return result;
+  }
+
+  async updateSession(id: number, userId: string, data: Partial<InsertTimetableSession>): Promise<TimetableSession | undefined> {
+    const [result] = await db
+      .update(timetableSessions)
+      .set(data)
+      .where(and(eq(timetableSessions.id, id), eq(timetableSessions.userId, userId)))
+      .returning();
+    return result;
+  }
+
+  async deleteSession(id: number, userId: string): Promise<void> {
+    await db.delete(timetableSessions).where(and(eq(timetableSessions.id, id), eq(timetableSessions.userId, userId)));
+  }
+
+  async getReflections(userId: string): Promise<Reflection[]> {
+    return db.select().from(reflections).where(eq(reflections.userId, userId));
+  }
+
+  async addReflection(reflection: InsertReflection): Promise<Reflection> {
+    const [result] = await db.insert(reflections).values(reflection).returning();
+    return result;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
