@@ -58,25 +58,25 @@ export default function Reflect() {
           >
             {/* Dynamic Class Selection */}
             <div className="space-y-3">
-               <h2 className="text-xl font-serif text-stone-900 leading-tight">
+               <h2 className="text-3xl font-serif text-stone-900 leading-snug">
                    How did your <br/>
                    <div className="relative inline-block mt-2">
                      <select 
-                        className="appearance-none bg-stone-100 border-b-2 border-stone-800 text-stone-900 font-bold py-1 pl-3 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500/20"
+                        className="appearance-none bg-transparent border-b-2 border-stone-300 hover:border-stone-900 text-stone-900 font-bold py-1 pl-0 pr-8 rounded-none focus:outline-none transition-colors cursor-pointer w-auto min-w-[200px]"
                         value={selectedClassId || ""}
                         onChange={(e) => setSelectedClassId(e.target.value)}
                      >
                         {recentClasses.length > 0 ? (
                             recentClasses.map(c => (
-                                <option key={c.id} value={c.id}>{c.subject} ({c.className})</option>
+                                <option key={c.id} value={c.id}>{c.subject} ({c.className}{c.section ? `-${c.section}` : ''})</option>
                             ))
                         ) : (
                             <option>Class</option>
                         )}
                      </select>
-                     <ChevronDown className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-stone-500" />
+                     <ChevronDown className="w-6 h-6 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400" />
                    </div>
-                   <br/> <span className="mt-2 block">lesson go?</span>
+                   <br/> <span className="mt-2 block text-stone-400">lesson go?</span>
                </h2>
                {selectedClass?.topic && (
                    <p className="text-stone-500 text-sm italic">Topic: {selectedClass.topic}</p>
