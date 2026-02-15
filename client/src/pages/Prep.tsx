@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Layout from "@/components/Layout";
 import { motion } from "framer-motion";
-import { ArrowLeft, Sparkles, Clock, Target, Lightbulb, ChevronRight, Check } from "lucide-react";
+import { ArrowLeft, Sparkles, Target, Lightbulb, AlertTriangle, BookOpen, Layers } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Prep() {
@@ -22,73 +22,76 @@ export default function Prep() {
     <Layout>
       <div className="p-6 pt-12 min-h-screen pb-32">
         
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        {/* Navigation Header */}
+        <div className="flex items-center mb-8">
           <Link href="/">
-            <button className="p-2 rounded-full bg-white shadow-sm border border-gray-100 hover:bg-gray-50">
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            <button className="p-2 -ml-2 rounded-full hover:bg-stone-100 transition-colors text-stone-500">
+              <ArrowLeft className="w-6 h-6" />
             </button>
           </Link>
-          <div className="flex flex-col items-center">
-             <span className="font-display font-bold text-blue-600 tracking-wider text-sm uppercase">Prep Mode</span>
-             <span className="text-xs text-gray-400">30 Second Planner</span>
+          <div className="ml-4">
+             <h1 className="font-serif text-2xl text-stone-900">Lesson Prep</h1>
+             <p className="text-xs font-medium text-stone-400 uppercase tracking-widest">30 Second Planner</p>
           </div>
-          <div className="w-9" />
         </div>
 
         {step === "input" && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
+            className="space-y-8"
           >
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Subject</label>
-              <select 
-                className="w-full p-4 rounded-xl bg-gray-50 border-transparent focus:border-blue-500 focus:bg-white focus:ring-0 transition-all font-medium"
-                onChange={(e) => setFormData({...formData, subject: e.target.value})}
-              >
-                <option value="">Select Subject</option>
-                <option value="Biology">Biology</option>
-                <option value="Math">Mathematics</option>
-                <option value="History">History</option>
-                <option value="English">English</option>
-              </select>
-            </div>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-stone-500 uppercase tracking-wide">Subject</label>
+                <select 
+                  className="w-full p-4 rounded-none border-b border-stone-200 bg-transparent text-xl font-serif text-stone-900 focus:outline-none focus:border-stone-900 transition-colors appearance-none"
+                  onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                  value={formData.subject}
+                >
+                  <option value="" disabled>Select Subject</option>
+                  <option value="Biology">Biology</option>
+                  <option value="Math">Mathematics</option>
+                  <option value="History">History</option>
+                  <option value="English">English</option>
+                </select>
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Topic</label>
-              <input 
-                type="text" 
-                placeholder="e.g. Cell Structure"
-                className="w-full p-4 rounded-xl bg-gray-50 border-transparent focus:border-blue-500 focus:bg-white focus:ring-0 transition-all font-medium"
-                onChange={(e) => setFormData({...formData, topic: e.target.value})}
-              />
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-stone-500 uppercase tracking-wide">Topic</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Cell Structure"
+                  className="w-full p-4 pl-0 rounded-none border-b border-stone-200 bg-transparent text-xl font-serif text-stone-900 focus:outline-none focus:border-stone-900 placeholder:text-stone-300 transition-colors"
+                  onChange={(e) => setFormData({...formData, topic: e.target.value})}
+                  value={formData.topic}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Class Level</label>
-              <div className="flex gap-3">
-                {["6", "7", "8", "9", "10"].map((cls) => (
-                  <button 
-                    key={cls}
-                    onClick={() => setFormData({...formData, class: cls})}
-                    className={`flex-1 py-3 rounded-xl font-medium border transition-colors ${
-                      formData.class === cls 
-                        ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200" 
-                        : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    {cls}
-                  </button>
-                ))}
+              <div className="space-y-4">
+                <label className="text-sm font-bold text-stone-500 uppercase tracking-wide">Class Level</label>
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                  {["6", "7", "8", "9", "10", "11", "12"].map((cls) => (
+                    <button 
+                      key={cls}
+                      onClick={() => setFormData({...formData, class: cls})}
+                      className={`w-12 h-12 rounded-full font-medium border transition-all flex-shrink-0 flex items-center justify-center ${
+                        formData.class === cls 
+                          ? "bg-stone-900 text-white border-stone-900" 
+                          : "bg-white border-stone-200 text-stone-500 hover:border-stone-400"
+                      }`}
+                    >
+                      {cls}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
             <button 
               onClick={generatePrep}
-              disabled={!formData.topic}
-              className="w-full py-4 mt-8 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold text-lg shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95 transition-all"
+              disabled={!formData.topic || !formData.subject}
+              className="w-full py-4 mt-8 rounded-lg bg-stone-900 text-white font-medium text-lg flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-800 transition-all shadow-xl shadow-stone-900/10"
             >
               <Sparkles className="w-5 h-5" />
               Generate Plan
@@ -97,14 +100,16 @@ export default function Prep() {
         )}
 
         {step === "generating" && (
-          <div className="flex flex-col items-center justify-center h-[60vh] space-y-6">
+          <div className="flex flex-col items-center justify-center h-[50vh] space-y-8">
             <div className="relative">
-              <div className="w-20 h-20 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
-              <Sparkles className="absolute inset-0 m-auto text-blue-600 w-8 h-8 animate-pulse" />
+              <div className="w-16 h-16 border-2 border-stone-100 border-t-stone-900 rounded-full animate-spin"></div>
             </div>
-            <div className="text-center space-y-2">
-              <h3 className="text-xl font-display font-bold text-gray-900">Aligning with NCF 2023...</h3>
-              <p className="text-gray-500 text-sm">Checking common misconceptions...</p>
+            <div className="text-center space-y-3">
+              <h3 className="text-2xl font-serif text-stone-900">Consulting NCF 2023...</h3>
+              <div className="flex flex-col gap-2 text-stone-500 text-sm">
+                <span className="animate-pulse">Identifying misconceptions...</span>
+                <span className="animate-pulse delay-75">Designing hooks...</span>
+              </div>
             </div>
           </div>
         )}
@@ -113,105 +118,105 @@ export default function Prep() {
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="space-y-6"
+            className="space-y-8"
           >
-            {/* Summary Card */}
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-lg shadow-blue-500/20">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h2 className="text-2xl font-display font-bold">Cell Structure</h2>
-                  <p className="opacity-80">Class 8 • Biology • 40 mins</p>
+            {/* Header */}
+            <div className="border-b border-stone-200 pb-6">
+               <span className="text-xs font-bold tracking-widest text-stone-400 uppercase">Lesson Plan</span>
+               <h2 className="text-3xl font-serif text-stone-900 mt-2 leading-tight">Cell Structure</h2>
+               <div className="flex gap-3 mt-3">
+                  <span className="px-3 py-1 bg-stone-100 rounded-full text-xs font-medium text-stone-600">Class 8</span>
+                  <span className="px-3 py-1 bg-stone-100 rounded-full text-xs font-medium text-stone-600">Biology</span>
+                  <span className="px-3 py-1 bg-stone-100 rounded-full text-xs font-medium text-stone-600">40 min</span>
+               </div>
+            </div>
+
+            {/* Cards */}
+            <div className="space-y-6">
+              
+              {/* Objective */}
+              <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                    <Target className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-serif font-bold text-stone-900">Learning Outcome</h3>
                 </div>
-                <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
-                  <Target className="w-6 h-6 text-white" />
+                <p className="text-stone-700 leading-relaxed">
+                  Students will be able to <span className="font-semibold text-stone-900">differentiate</span> between plant and animal cells using the 'Wall vs. Gate' analogy.
+                </p>
+              </div>
+
+              {/* Hook */}
+              <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
+                    <Lightbulb className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-serif font-bold text-stone-900">The Hook (5 min)</h3>
+                </div>
+                <p className="text-stone-700 leading-relaxed italic border-l-2 border-amber-200 pl-4">
+                  "Show a time-lapse of a flower wilting vs. a human collapsing. Why does the flower keep its shape?"
+                </p>
+              </div>
+
+              {/* Misconceptions */}
+              <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-rose-50 rounded-lg text-rose-600">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-serif font-bold text-stone-900">Common Pitfalls</h3>
+                </div>
+                <ul className="space-y-3">
+                  <li className="flex gap-3 text-stone-700">
+                    <span className="text-rose-500 font-bold">×</span>
+                    <span>Thinking all cells have walls.</span>
+                  </li>
+                  <li className="flex gap-3 text-stone-700">
+                    <span className="text-emerald-600 font-bold">✓</span>
+                    <span>Clarify: Only plants/bacteria need the rigid support.</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Bloom's Questions */}
+              <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                 <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                    <Layers className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-serif font-bold text-stone-900">Check Questions</h3>
+                </div>
+                <div className="space-y-4">
+                   <div>
+                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">Remember</span>
+                      <p className="text-stone-800">What is the function of the nucleus?</p>
+                   </div>
+                   <div className="border-t border-stone-100 pt-3">
+                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">Analyze</span>
+                      <p className="text-stone-800">Why don't animal cells burst when filled with water?</p>
+                   </div>
                 </div>
               </div>
-              <div className="bg-white/10 p-3 rounded-lg backdrop-blur-sm text-sm leading-relaxed">
-                <span className="font-bold opacity-100">NCF Goal:</span> Students develop inquiry skills around cell organelles (Stage 3).
-              </div>
+
             </div>
 
-            {/* Hook Card */}
-            <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-1 h-full bg-orange-400"></div>
-              <div className="flex items-center gap-2 mb-3">
-                <Lightbulb className="w-5 h-5 text-orange-500" />
-                <h3 className="font-bold text-gray-900">Opening Hook (3 min)</h3>
-              </div>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                Show a 30-sec time-lapse video of cell division. Ask: <span className="italic font-medium text-orange-600">"What just happened here?"</span>
-              </p>
+            <div className="pt-4 flex gap-4">
+              <button 
+                onClick={() => setStep("input")}
+                className="flex-1 py-4 rounded-lg border border-stone-200 text-stone-600 font-medium hover:bg-stone-50 transition-colors"
+              >
+                New Plan
+              </button>
+              <button className="flex-1 py-4 rounded-lg bg-stone-900 text-white font-medium hover:bg-stone-800 transition-colors flex items-center justify-center gap-2">
+                <BookOpen className="w-4 h-4" />
+                Start Class
+              </button>
             </div>
-
-            {/* Misconceptions */}
-            <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-1 h-full bg-red-400"></div>
-              <div className="flex items-center gap-2 mb-3">
-                <AlertCircle className="w-5 h-5 text-red-500" />
-                <h3 className="font-bold text-gray-900">Watch Out For</h3>
-              </div>
-              <ul className="space-y-3">
-                <li className="flex gap-3 text-sm text-gray-700">
-                  <span className="text-red-500 font-bold">×</span>
-                  <span>Thinking cell wall and membrane are the same.</span>
-                </li>
-                <li className="flex gap-3 text-sm text-gray-700">
-                  <span className="text-green-500 font-bold">✓</span>
-                  <span>Use Analogy: Wall = Brick Boundary, Membrane = Security Guard.</span>
-                </li>
-              </ul>
-            </div>
-
-             {/* Questions */}
-             <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-1 h-full bg-purple-400"></div>
-              <div className="flex items-center gap-2 mb-3">
-                <Check className="w-5 h-5 text-purple-500" />
-                <h3 className="font-bold text-gray-900">Check for Understanding</h3>
-              </div>
-              <div className="space-y-3">
-                 <div className="p-3 bg-gray-50 rounded-lg text-sm">
-                    <span className="text-xs font-bold text-purple-600 uppercase tracking-wide block mb-1">Remember</span>
-                    What are the main parts of a cell?
-                 </div>
-                 <div className="p-3 bg-gray-50 rounded-lg text-sm">
-                    <span className="text-xs font-bold text-purple-600 uppercase tracking-wide block mb-1">Apply</span>
-                    If a cell lost its membrane, what would happen?
-                 </div>
-              </div>
-            </div>
-
-            <button 
-              onClick={() => setStep("input")}
-              className="w-full py-4 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50"
-            >
-              Plan Another Lesson
-            </button>
           </motion.div>
         )}
       </div>
     </Layout>
   );
 }
-
-// Helper for Missing Icon
-function AlertCircle({ className }: { className?: string }) {
-    return (
-      <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        className={className}
-      >
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="12" />
-        <line x1="12" y1="16" x2="12.01" y2="16" />
-      </svg>
-    )
-  }

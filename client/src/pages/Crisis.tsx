@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import Layout from "@/components/Layout";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Send, AlertCircle, Volume2, ArrowLeft } from "lucide-react";
+import { Mic, Send, AlertCircle, Volume2, X, Ear } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Crisis() {
@@ -12,7 +11,7 @@ export default function Crisis() {
   const activateListening = () => {
     setStage("listening");
     setIsListening(true);
-    // Simulate listening duration
+    // Simulate listening
     setTimeout(() => {
       setIsListening(false);
       setStage("processing");
@@ -21,30 +20,26 @@ export default function Crisis() {
   };
 
   const quickFilters = [
-    { label: "Too Loud", icon: "🔊" },
-    { label: "Fighting", icon: "🥊" },
-    { label: "Crying", icon: "😢" },
-    { label: "Sleeping", icon: "😴" },
+    { label: "Too Loud", emoji: "🔊" },
+    { label: "Fighting", emoji: "🥊" },
+    { label: "Crying", emoji: "😢" },
+    { label: "Sleeping", emoji: "😴" },
   ];
 
+  // Crisis mode needs to be IMMERSIVE and DISTRACTION FREE
   return (
-    <div className="min-h-screen bg-white flex flex-col font-sans max-w-md mx-auto relative overflow-hidden">
+    <div className="min-h-screen bg-[#FDFCF8] flex flex-col font-sans max-w-md mx-auto relative overflow-hidden">
       
-      {/* Background Pulse Animation for Crisis Mode */}
-      <div className="absolute inset-0 bg-red-50/50 z-0 pointer-events-none" />
-      
-      {/* Header */}
-      <div className="relative z-10 px-6 pt-12 pb-4 flex items-center justify-between">
+      {/* Escape Hatch */}
+      <div className="absolute top-6 right-6 z-50">
         <Link href="/">
-          <button className="p-2 rounded-full bg-white shadow-sm border border-gray-100 hover:bg-gray-50">
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
+          <button className="p-3 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 transition-colors">
+            <X className="w-6 h-6" />
           </button>
         </Link>
-        <span className="font-display font-bold text-red-600 tracking-wider text-sm uppercase">Crisis Mode</span>
-        <div className="w-9" /> {/* Spacer */}
       </div>
 
-      <main className="flex-1 flex flex-col relative z-10 px-6">
+      <main className="flex-1 flex flex-col relative z-10">
         
         <AnimatePresence mode="wait">
           {stage === "idle" && (
@@ -53,24 +48,26 @@ export default function Crisis() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex-1 flex flex-col items-center justify-center space-y-12 pb-12"
+              className="flex-1 flex flex-col px-6 pt-24 pb-12"
             >
-              <div className="text-center space-y-2">
-                <h1 className="text-3xl font-display font-bold text-gray-900">What's happening?</h1>
-                <p className="text-gray-500">Tap the button or whisper to describe.</p>
+              <div className="mb-12">
+                <h1 className="text-4xl font-serif text-stone-900 mb-2">Crisis Support</h1>
+                <p className="text-stone-500 text-lg">Tap to speak or select a trigger.</p>
               </div>
 
-              {/* The Big Red Button */}
-              <button 
-                onClick={activateListening}
-                className="w-48 h-48 rounded-full bg-gradient-to-br from-red-500 to-red-600 shadow-2xl shadow-red-500/30 flex items-center justify-center transform active:scale-95 transition-all duration-200 group relative"
-              >
-                <div className="absolute inset-0 rounded-full border-4 border-white/20 animate-ping opacity-20"></div>
-                <Mic className="w-16 h-16 text-white group-hover:scale-110 transition-transform" />
-              </button>
+              {/* The "Tactile" Button */}
+              <div className="flex justify-center mb-12">
+                <button 
+                  onClick={activateListening}
+                  className="w-48 h-48 rounded-full bg-[#E54D2E] shadow-[0_20px_60px_-15px_rgba(229,77,46,0.4)] flex flex-col items-center justify-center transform active:scale-95 transition-all duration-200 group relative border-4 border-[#FDFCF8] outline outline-1 outline-stone-200"
+                >
+                  <Mic className="w-12 h-12 text-white mb-2" />
+                  <span className="text-white font-medium tracking-wide text-sm uppercase">Tap to Speak</span>
+                </button>
+              </div>
 
-              {/* Quick Filters */}
-              <div className="grid grid-cols-2 gap-3 w-full">
+              {/* High Contrast Quick Filters */}
+              <div className="grid grid-cols-2 gap-4">
                 {quickFilters.map((filter) => (
                   <button 
                     key={filter.label}
@@ -79,20 +76,20 @@ export default function Crisis() {
                       setStage("processing");
                       setTimeout(() => setStage("solution"), 1500);
                     }}
-                    className="flex items-center justify-center gap-2 p-4 rounded-xl bg-white border border-gray-100 shadow-sm hover:border-red-200 hover:bg-red-50 transition-colors"
+                    className="flex items-center gap-4 p-5 rounded-xl bg-white border border-stone-200 shadow-sm hover:border-[#E54D2E] hover:bg-red-50/30 transition-all group"
                   >
-                    <span className="text-xl">{filter.icon}</span>
-                    <span className="font-medium text-gray-700">{filter.label}</span>
+                    <span className="text-2xl grayscale group-hover:grayscale-0 transition-all">{filter.emoji}</span>
+                    <span className="font-semibold text-stone-700 text-lg">{filter.label}</span>
                   </button>
                 ))}
               </div>
 
-              {/* Whisper Input */}
-              <div className="w-full relative">
-                <input 
+              {/* Discreet Input */}
+              <div className="mt-auto pt-8">
+                 <input 
                   type="text" 
-                  placeholder="Or type silently (e.g., 'kid crying')"
-                  className="w-full pl-4 pr-12 py-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-red-500/20 text-gray-900 placeholder:text-gray-400"
+                  placeholder="Type silently..."
+                  className="w-full bg-transparent border-b border-stone-300 py-3 text-lg focus:outline-none focus:border-stone-900 placeholder:text-stone-300 transition-colors"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       setTranscript(e.currentTarget.value);
@@ -100,10 +97,7 @@ export default function Crisis() {
                       setTimeout(() => setStage("solution"), 1500);
                     }
                   }}
-                />
-                <button className="absolute right-3 top-3 p-1.5 rounded-lg bg-red-500 text-white">
-                  <Send className="w-4 h-4" />
-                </button>
+                 />
               </div>
             </motion.div>
           )}
@@ -114,19 +108,16 @@ export default function Crisis() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex-1 flex flex-col items-center justify-center"
+              className="flex-1 flex flex-col items-center justify-center bg-[#E54D2E] text-white"
             >
-              <div className="flex gap-2 items-center h-12 mb-8">
-                 {[1,2,3,4,5].map((i) => (
-                   <motion.div 
-                     key={i}
-                     animate={{ height: [10, 32, 10] }}
-                     transition={{ repeat: Infinity, duration: 1, delay: i * 0.1 }}
-                     className="w-2 bg-red-500 rounded-full"
-                   />
-                 ))}
-              </div>
-              <p className="text-xl font-medium text-gray-700">Listening...</p>
+              <motion.div 
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+                className="mb-8"
+              >
+                <Ear className="w-16 h-16" />
+              </motion.div>
+              <h2 className="text-3xl font-serif">Listening...</h2>
             </motion.div>
           )}
 
@@ -136,10 +127,10 @@ export default function Crisis() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex-1 flex flex-col items-center justify-center"
+              className="flex-1 flex flex-col items-center justify-center bg-[#FDFCF8]"
             >
-              <div className="w-16 h-16 border-4 border-red-100 border-t-red-600 rounded-full animate-spin mb-6"></div>
-              <p className="text-lg text-gray-600">Analyzing situation...</p>
+              <div className="w-12 h-12 border-4 border-stone-200 border-t-stone-800 rounded-full animate-spin mb-6"></div>
+              <p className="text-lg text-stone-500 font-serif italic">Consulting strategies...</p>
             </motion.div>
           )}
 
@@ -148,53 +139,54 @@ export default function Crisis() {
               key="solution"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex-1 flex flex-col py-6 pb-24"
+              className="flex-1 flex flex-col bg-[#FDFCF8]"
             >
-              <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-                <div className="bg-red-500 p-6 text-white">
-                  <div className="flex items-center gap-2 mb-2 opacity-90">
-                    <AlertCircle className="w-5 h-5" />
-                    <span className="text-sm font-bold uppercase tracking-wide">Immediate Action</span>
-                  </div>
-                  <h2 className="text-2xl font-display font-bold leading-tight">
-                    Walk to the student. Kneel. Whisper: "I see you. Take a breath."
-                  </h2>
+              {/* Solution Header - High Contrast */}
+              <div className="bg-[#2D3339] px-6 pt-16 pb-8 rounded-b-[2rem] shadow-xl z-20">
+                <div className="flex items-center gap-2 mb-4 text-red-300">
+                  <AlertCircle className="w-5 h-5" />
+                  <span className="text-xs font-bold uppercase tracking-widest">Immediate Action</span>
+                </div>
+                <h2 className="text-3xl font-serif text-white leading-tight mb-6">
+                  Walk to the student. Kneel. Whisper: "I see you. Take a breath."
+                </h2>
+                <button className="flex items-center gap-3 bg-white/10 backdrop-blur-sm text-white px-5 py-3 rounded-full hover:bg-white/20 transition-colors">
+                   <Volume2 className="w-5 h-5" />
+                   <span className="font-medium">Read Aloud</span>
+                </button>
+              </div>
+              
+              <div className="flex-1 p-6 space-y-8 overflow-y-auto">
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold tracking-widest text-stone-400 uppercase">Why this works</h3>
+                  <p className="text-stone-700 text-lg leading-relaxed border-l-2 border-stone-200 pl-4">
+                    Eye-level contact reduces threat perception. Whispering creates a "conspiracy of calm" that forces the student to quiet down to hear you.
+                  </p>
                 </div>
                 
-                <div className="p-6 space-y-6">
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Why this works</h3>
-                    <p className="text-gray-700 leading-relaxed">
-                      Getting to eye level reduces threat. Whispering forces them to quiet down to hear you. Acknowledging emotion de-escalates immediately.
-                    </p>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                    <h3 className="text-sm font-bold text-gray-900 mb-2">Next Steps</h3>
-                    <ul className="space-y-2 text-sm text-gray-600">
-                      <li className="flex gap-2">
-                        <span className="text-red-500">•</span>
-                        After class: Private check-in
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold tracking-widest text-stone-400 uppercase">Next Steps</h3>
+                  <div className="bg-white p-5 rounded-xl border border-stone-200 shadow-sm">
+                     <ul className="space-y-4">
+                      <li className="flex items-start gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-stone-400 mt-2.5" />
+                        <span className="text-stone-600">Check in privately after class ends (5 mins)</span>
                       </li>
-                      <li className="flex gap-2">
-                        <span className="text-red-500">•</span>
-                        Inform counselor if behavior persists
+                      <li className="flex items-start gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-stone-400 mt-2.5" />
+                        <span className="text-stone-600">Document incident in Reflect mode later</span>
                       </li>
-                    </ul>
+                     </ul>
                   </div>
+                </div>
 
-                  <div className="flex gap-3">
+                <div className="pt-4">
                     <button 
                       onClick={() => setStage("idle")}
-                      className="flex-1 py-3 rounded-xl border border-gray-200 font-semibold text-gray-600 hover:bg-gray-50"
+                      className="w-full py-4 rounded-xl bg-stone-100 text-stone-900 font-semibold hover:bg-stone-200 transition-colors"
                     >
-                      Done
+                      Mark Resolved
                     </button>
-                    <button className="flex-1 py-3 rounded-xl bg-gray-900 text-white font-semibold flex items-center justify-center gap-2 hover:bg-gray-800">
-                      <Volume2 className="w-4 h-4" />
-                      Read Aloud
-                    </button>
-                  </div>
                 </div>
               </div>
             </motion.div>

@@ -5,64 +5,52 @@
 
 @theme inline {
   --font-sans: 'Inter', sans-serif;
-  --font-display: 'Outfit', sans-serif;
-  --font-mono: 'Space Grotesk', monospace;
+  --font-serif: 'Libre Baskerville', serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
 
-  /* Crisis Mode Colors (Red/Urgent) */
-  --color-crisis: 0 84% 60%;
-  --color-crisis-foreground: 0 0% 100%;
-  --color-crisis-soft: 0 84% 95%;
-
-  /* Prep Mode Colors (Blue/Focus) */
-  --color-prep: 215 90% 52%;
-  --color-prep-foreground: 0 0% 100%;
-  --color-prep-soft: 215 90% 96%;
-
-  /* Reflect Mode Colors (Purple/Insight) */
-  --color-reflect: 265 80% 60%;
-  --color-reflect-foreground: 0 0% 100%;
-  --color-reflect-soft: 265 80% 96%;
-
-  /* Base UI Colors */
-  --color-background: 210 20% 98%;
-  --color-foreground: 220 20% 20%;
+  /* Anthropic-inspired Warm Palette */
+  --color-background: 40 20% 97%; /* Warm Paper */
+  --color-foreground: 20 10% 20%; /* Soft Charcoal */
   
   --color-card: 0 0% 100%;
-  --color-card-foreground: 220 20% 20%;
+  --color-card-foreground: 20 10% 20%;
   
   --color-popover: 0 0% 100%;
-  --color-popover-foreground: 220 20% 20%;
+  --color-popover-foreground: 20 10% 20%;
   
-  --color-primary: 220 20% 20%;
-  --color-primary-foreground: 0 0% 100%;
+  --color-primary: 27 20% 30%; /* Deep Warm Brown/Gray */
+  --color-primary-foreground: 40 20% 97%;
   
-  --color-secondary: 210 20% 94%;
-  --color-secondary-foreground: 220 20% 20%;
+  --color-secondary: 40 20% 92%; /* Darker Paper */
+  --color-secondary-foreground: 27 20% 30%;
   
-  --color-muted: 210 20% 94%;
-  --color-muted-foreground: 220 10% 40%;
+  --color-muted: 40 10% 90%;
+  --color-muted-foreground: 27 10% 45%;
   
-  --color-accent: 210 20% 94%;
-  --color-accent-foreground: 220 20% 20%;
+  --color-accent: 27 20% 30%;
+  --color-accent-foreground: 40 20% 97%;
   
-  --color-destructive: 0 84% 60%;
-  --color-destructive-foreground: 0 0% 100%;
+  --color-destructive: 0 70% 50%;
+  --color-destructive-foreground: 0 0% 98%;
 
-  --color-border: 220 10% 90%;
-  --color-input: 220 10% 90%;
-  --color-ring: 215 90% 52%;
-
-  /* Chart Colors */
-  --color-chart-1: 12 76% 61%;
-  --color-chart-2: 173 58% 39%;
-  --color-chart-3: 197 37% 24%;
-  --color-chart-4: 43 74% 66%;
-  --color-chart-5: 27 87% 67%;
+  --color-border: 27 10% 85%;
+  --color-input: 27 10% 85%;
+  --color-ring: 27 20% 30%;
+  
+  /* Mode Specific Colors - Muted & Sophisticated */
+  --color-crisis: 0 70% 55%; /* Refined Red */
+  --color-crisis-soft: 0 70% 96%;
+  
+  --color-prep: 210 30% 45%; /* Slate Blue */
+  --color-prep-soft: 210 30% 96%;
+  
+  --color-reflect: 260 20% 50%; /* Muted Purple */
+  --color-reflect-soft: 260 20% 96%;
 }
 
 @layer base {
@@ -70,16 +58,16 @@
     @apply border-border;
   }
   body {
-    @apply font-sans antialiased bg-background text-foreground selection:bg-prep/20 selection:text-prep;
+    @apply font-sans antialiased bg-background text-foreground selection:bg-stone-200 selection:text-stone-900;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight;
+    @apply font-serif tracking-tight text-primary;
   }
 }
 
 @layer utilities {
-  .glass {
-    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-sm;
+  .paper-card {
+    @apply bg-white border border-stone-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-300;
   }
   
   .safe-area-bottom {
@@ -89,17 +77,13 @@
   .text-balance {
     text-wrap: balance;
   }
-
-  /* Mode Gradients */
+  
+  /* Sophisticated Gradients */
   .bg-gradient-crisis {
-    background: linear-gradient(135deg, hsl(0 84% 60%) 0%, hsl(10 90% 65%) 100%);
+    background: linear-gradient(135deg, hsl(0 70% 55%) 0%, hsl(10 60% 50%) 100%);
   }
   
   .bg-gradient-prep {
-    background: linear-gradient(135deg, hsl(215 90% 52%) 0%, hsl(200 90% 50%) 100%);
-  }
-  
-  .bg-gradient-reflect {
-    background: linear-gradient(135deg, hsl(265 80% 60%) 0%, hsl(250 80% 65%) 100%);
+    background: linear-gradient(135deg, hsl(210 30% 45%) 0%, hsl(200 30% 40%) 100%);
   }
 }
