@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { storage } from "./storage";
 import { insertTeacherProfileSchema, insertTimetableSessionSchema, insertReflectionSchema } from "@shared/schema";
+import { setupGeminiLive } from "./gemini-live";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -10,6 +11,8 @@ export async function registerRoutes(
 ): Promise<Server> {
   await setupAuth(app);
   registerAuthRoutes(app);
+
+  setupGeminiLive(httpServer);
 
   app.get("/api/profile", isAuthenticated, async (req: any, res) => {
     try {

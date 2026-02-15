@@ -11,6 +11,7 @@ import Prep from "@/pages/Prep";
 import Reflect from "@/pages/Reflect";
 import Profile from "@/pages/Profile";
 import Onboarding from "@/pages/Onboarding";
+import Speak from "@/pages/Speak";
 import { Sparkles } from "lucide-react";
 
 function Landing() {
@@ -94,6 +95,9 @@ function Router() {
       </Route>
       <Route path="/profile">
         <ProtectedRoute component={Profile} />
+      </Route>
+      <Route path="/speak">
+        <ProtectedRoute component={Speak} />
       </Route>
       <Route component={NotFound} />
     </Switch>
