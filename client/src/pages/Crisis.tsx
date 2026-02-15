@@ -6,6 +6,7 @@ import { Link } from "wouter";
 export default function Crisis() {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
+  const [inputValue, setInputValue] = useState("");
   const [stage, setStage] = useState<"idle" | "listening" | "processing" | "solution">("idle");
 
   const activateListening = () => {
@@ -86,18 +87,37 @@ export default function Crisis() {
 
               {/* Discreet Input */}
               <div className="mt-auto pt-8">
-                 <input 
-                  type="text" 
-                  placeholder="Type silently..."
-                  className="w-full bg-transparent border-b border-stone-300 py-3 text-lg focus:outline-none focus:border-stone-900 placeholder:text-stone-300 transition-colors"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setTranscript(e.currentTarget.value);
-                      setStage("processing");
-                      setTimeout(() => setStage("solution"), 1500);
-                    }
-                  }}
-                 />
+                <div className="flex items-center gap-3">
+                   <input 
+                    type="text" 
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="Type silently..."
+                    className="flex-1 bg-transparent border-b border-stone-300 py-3 text-lg focus:outline-none focus:border-stone-900 placeholder:text-stone-300 transition-colors"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && inputValue.trim()) {
+                        setTranscript(inputValue);
+                        setStage("processing");
+                        setTimeout(() => setStage("solution"), 1500);
+                        setInputValue("");
+                      }
+                    }}
+                   />
+                   <button 
+                     onClick={() => {
+                        if (inputValue.trim()) {
+                          setTranscript(inputValue);
+                          setStage("processing");
+                          setTimeout(() => setStage("solution"), 1500);
+                          setInputValue("");
+                        }
+                     }}
+                     disabled={!inputValue.trim()}
+                     className="p-3 bg-stone-900 text-white rounded-full hover:bg-stone-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                   >
+                     <Send className="w-5 h-5" />
+                   </button>
+                </div>
               </div>
             </motion.div>
           )}
