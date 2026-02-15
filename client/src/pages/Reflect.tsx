@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Layout from "@/components/Layout";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Check, ThumbsUp, ThumbsDown, Meh, TrendingUp, Calendar, ChevronDown } from "lucide-react";
 import { Link } from "wouter";
 
@@ -8,6 +8,7 @@ type ClassSession = {
   id: string;
   time: string;
   className: string;
+  section?: string;
   subject: string;
   topic?: string;
 };
@@ -17,6 +18,8 @@ export default function Reflect() {
   const [energy, setEnergy] = useState<number | null>(null);
   const [recentClasses, setRecentClasses] = useState<ClassSession[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("teacherOS_timetable");
@@ -29,9 +32,24 @@ export default function Reflect() {
           setSelectedClassId(schedule[0].id);
       }
     }
+
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const selectedClass = recentClasses.find(c => c.id === selectedClassId);
+
+  const handleSelectClass = (id: string) => {
+    setSelectedClassId(id);
+    setIsDropdownOpen(false);
+  };
 
   return (
     <Layout>
@@ -60,22 +78,56 @@ export default function Reflect() {
             <div className="space-y-3">
                <h2 className="text-3xl font-serif text-stone-900 leading-snug">
                    How did your <br/>
-                   <div className="relative inline-block mt-2">
-                     <select 
-                        className="appearance-none bg-transparent border-b-2 border-stone-300 hover:border-stone-900 text-stone-900 font-bold py-1 pl-0 pr-8 rounded-none focus:outline-none transition-colors cursor-pointer w-auto min-w-[200px]"
-                        value={selectedClassId || ""}
-                        onChange={(e) => setSelectedClassId(e.target.value)}
+                   
+                   <div className="relative inline-block mt-2" ref={dropdownRef}>
+                     <button 
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="flex items-center gap-2 border-b-2 border-stone-300 hover:border-stone-900 text-stone-900 font-bold py-1 px-0 transition-colors cursor-pointer group"
                      >
-                        {recentClasses.length > 0 ? (
-                            recentClasses.map(c => (
-                                <option key={c.id} value={c.id}>{c.subject} ({c.className}{c.section ? `-${c.section}` : ''})</option>
-                            ))
-                        ) : (
-                            <option>Class</option>
+                        <span>
+                            {selectedClass 
+                                ? `${selectedClass.subject} (${selectedClass.className}${selectedClass.section ? `-${selectedClass.section}` : ''})` 
+                                : "Select Class"
+                            }
+                        </span>
+                        <ChevronDown className={`w-6 h-6 text-stone-400 transition-transform group-hover:text-stone-600 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                     </button>
+
+                     <AnimatePresence>
+                        {isDropdownOpen && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                className="absolute left-0 top-full mt-2 w-64 bg-white rounded-xl shadow-xl border border-stone-200 z-50 overflow-hidden"
+                            >
+                                <div className="py-1">
+                                    {recentClasses.length > 0 ? (
+                                        recentClasses.map(c => (
+                                            <button
+                                                key={c.id}
+                                                onClick={() => handleSelectClass(c.id)}
+                                                className={`w-full text-left px-4 py-3 hover:bg-stone-50 transition-colors flex flex-col ${selectedClassId === c.id ? 'bg-stone-50' : ''}`}
+                                            >
+                                                <span className={`font-serif font-bold ${selectedClassId === c.id ? 'text-stone-900' : 'text-stone-600'}`}>
+                                                    {c.subject}
+                                                </span>
+                                                <span className="text-xs text-stone-400 font-medium">
+                                                    Class {c.className}{c.section ? `-${c.section}` : ''} • {c.time}
+                                                </span>
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="px-4 py-3 text-stone-400 text-sm italic">
+                                            No classes scheduled
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
                         )}
-                     </select>
-                     <ChevronDown className="w-6 h-6 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400" />
+                     </AnimatePresence>
                    </div>
+                   
                    <br/> <span className="mt-2 block text-stone-400">lesson go?</span>
                </h2>
                {selectedClass?.topic && (
