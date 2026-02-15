@@ -18,8 +18,8 @@ export default function Crisis() {
   const connectWebSocket = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/crisis`);
+    // Connect to the Python WebSocket server (Lyzr NCF RAG)
+    const ws = new WebSocket("ws://localhost:8765");
 
     ws.onopen = () => {
       console.log("Crisis WS connected");

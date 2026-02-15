@@ -1,8 +1,51 @@
 import { useState } from "react";
 import Layout from "@/components/Layout";
 import { motion } from "framer-motion";
-import { ArrowLeft, Sparkles, Target, Lightbulb, AlertTriangle, BookOpen, Layers } from "lucide-react";
+import { ArrowLeft, Sparkles, Target, Lightbulb, BookOpen, Layers } from "lucide-react";
 import { Link } from "wouter";
+
+interface PrepResult {
+  answer: string;
+  key_points: string[];
+  sources: string[];
+  suggested_followups: string[];
+}
+
+function renderAnswer(text: string) {
+  return text.split('\n').map((line: string, i: number) => {
+    const trimmed = line.trim();
+    if (!trimmed) return <div key={i} className="h-2" />;
+
+    // Bold text
+    const parts = trimmed.split(/\*\*(.*?)\*\*/g);
+    const rendered = parts.map((part: string, j: number) =>
+      j % 2 === 1
+        ? <strong key={j} className="font-semibold text-stone-900">{part}</strong>
+        : <span key={j}>{part}</span>
+    );
+
+    // Numbered list
+    if (/^\d+[.)]\s/.test(trimmed)) {
+      return <p key={i} className="pl-2 py-0.5">{rendered}</p>;
+    }
+    // Bullet
+    if (/^[-•*]\s/.test(trimmed)) {
+      return (
+        <p key={i} className="pl-4 py-0.5 flex gap-2">
+          <span className="text-stone-400">•</span>
+          <span>{rendered}</span>
+        </p>
+      );
+    }
+    // Heading
+    if (trimmed.startsWith('#')) {
+      const headingText = trimmed.replace(/^#+\s*/, '');
+      return <p key={i} className="font-bold text-stone-900 mt-3 mb-1">{headingText}</p>;
+    }
+
+    return <p key={i} className="py-0.5">{rendered}</p>;
+  });
+}
 
 export default function Prep() {
   const [step, setStep] = useState<"input" | "generating" | "result">("input");
@@ -13,9 +56,58 @@ export default function Prep() {
     class: ""
   });
 
-  const generatePrep = () => {
+  const [result, setResult] = useState<PrepResult | null>(null);
+  const [error, setError] = useState("");
+
+  const generatePrep = async () => {
     setStep("generating");
-    setTimeout(() => setStep("result"), 2000);
+    setError("");
+
+    try {
+      const res = await fetch("/api/prep", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          subject: formData.subject,
+          topic: formData.topic,
+          class: formData.class,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to generate lesson plan");
+      }
+
+      const data = await res.json();
+
+      // The Lyzr API returns { response: "{ JSON string }" }
+      let parsed: PrepResult;
+      const rawResponse = data.response || data;
+
+      if (typeof rawResponse === "string") {
+        try {
+          parsed = JSON.parse(rawResponse);
+        } catch {
+          parsed = { answer: rawResponse, key_points: [], sources: [], suggested_followups: [] };
+        }
+      } else {
+        parsed = rawResponse;
+      }
+
+      // Ensure all fields exist
+      parsed.answer = parsed.answer || "";
+      parsed.key_points = parsed.key_points || [];
+      parsed.sources = parsed.sources || [];
+      parsed.suggested_followups = parsed.suggested_followups || [];
+
+      setResult(parsed);
+      setStep("result");
+    } catch (err: any) {
+      console.error("Prep generation error:", err);
+      setError(err.message || "Something went wrong");
+      setStep("input");
+    }
   };
 
   return (
@@ -31,7 +123,7 @@ export default function Prep() {
           </Link>
           <div className="ml-4">
              <h1 className="font-serif text-2xl text-stone-900">Lesson Prep</h1>
-             <p className="text-xs font-medium text-stone-400 uppercase tracking-widest">30 Second Planner</p>
+             <p className="text-xs font-medium text-stone-400 uppercase tracking-widest">NCF-Aligned Planner</p>
           </div>
         </div>
 
@@ -41,6 +133,12 @@ export default function Prep() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8"
           >
+            {error && (
+              <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-sm">
+                {error}
+              </div>
+            )}
+
             <div className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-bold text-stone-500 uppercase tracking-wide">Subject</label>
@@ -54,6 +152,10 @@ export default function Prep() {
                   <option value="Math">Mathematics</option>
                   <option value="History">History</option>
                   <option value="English">English</option>
+                  <option value="Physics">Physics</option>
+                  <option value="Chemistry">Chemistry</option>
+                  <option value="Geography">Geography</option>
+                  <option value="Computer Science">Computer Science</option>
                 </select>
               </div>
 
@@ -107,14 +209,14 @@ export default function Prep() {
             <div className="text-center space-y-3">
               <h3 className="text-2xl font-serif text-stone-900">Consulting NCF 2023...</h3>
               <div className="flex flex-col gap-2 text-stone-500 text-sm">
-                <span className="animate-pulse">Identifying misconceptions...</span>
-                <span className="animate-pulse delay-75">Designing hooks...</span>
+                <span className="animate-pulse">Searching knowledge base...</span>
+                <span className="animate-pulse delay-75">Generating teaching strategy...</span>
               </div>
             </div>
           </div>
         )}
 
-        {step === "result" && (
+        {step === "result" && result && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -123,96 +225,111 @@ export default function Prep() {
             {/* Header */}
             <div className="border-b border-stone-200 pb-6">
                <span className="text-xs font-bold tracking-widest text-stone-400 uppercase">Lesson Plan</span>
-               <h2 className="text-3xl font-serif text-stone-900 mt-2 leading-tight">Cell Structure</h2>
+               <h2 className="text-3xl font-serif text-stone-900 mt-2 leading-tight">{formData.topic}</h2>
                <div className="flex gap-3 mt-3">
-                  <span className="px-3 py-1 bg-stone-100 rounded-full text-xs font-medium text-stone-600">Class 8</span>
-                  <span className="px-3 py-1 bg-stone-100 rounded-full text-xs font-medium text-stone-600">Biology</span>
-                  <span className="px-3 py-1 bg-stone-100 rounded-full text-xs font-medium text-stone-600">40 min</span>
+                  {formData.class && (
+                    <span className="px-3 py-1 bg-stone-100 rounded-full text-xs font-medium text-stone-600">Class {formData.class}</span>
+                  )}
+                  <span className="px-3 py-1 bg-stone-100 rounded-full text-xs font-medium text-stone-600">{formData.subject}</span>
+                  <span className="px-3 py-1 bg-stone-100 rounded-full text-xs font-medium text-stone-600">NCF-Aligned</span>
                </div>
             </div>
 
             {/* Cards */}
             <div className="space-y-6">
               
-              {/* Objective */}
-              <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
-                    <Target className="w-5 h-5" />
+              {/* Main Teaching Strategy (from answer) */}
+              {result.answer && (
+                <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                      <Target className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-serif font-bold text-stone-900">Teaching Strategy</h3>
                   </div>
-                  <h3 className="font-serif font-bold text-stone-900">Learning Outcome</h3>
+                  <div className="text-stone-700 leading-relaxed text-sm space-y-0.5">
+                    {renderAnswer(result.answer)}
+                  </div>
                 </div>
-                <p className="text-stone-700 leading-relaxed">
-                  Students will be able to <span className="font-semibold text-stone-900">differentiate</span> between plant and animal cells using the 'Wall vs. Gate' analogy.
-                </p>
-              </div>
+              )}
 
-              {/* Hook */}
-              <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
-                    <Lightbulb className="w-5 h-5" />
+              {/* Key Points */}
+              {result.key_points.length > 0 && (
+                <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
+                      <Lightbulb className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-serif font-bold text-stone-900">Key Points</h3>
                   </div>
-                  <h3 className="font-serif font-bold text-stone-900">The Hook (5 min)</h3>
+                  <ul className="space-y-3">
+                    {result.key_points.map((point: string, i: number) => (
+                      <li key={i} className="flex gap-3 text-stone-700 text-sm">
+                        <span className="text-amber-500 font-bold mt-0.5 flex-shrink-0">✦</span>
+                        <span className="leading-relaxed">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <p className="text-stone-700 leading-relaxed italic border-l-2 border-amber-200 pl-4">
-                  "Show a time-lapse of a flower wilting vs. a human collapsing. Why does the flower keep its shape?"
-                </p>
-              </div>
+              )}
 
-              {/* Misconceptions */}
-              <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-rose-50 rounded-lg text-rose-600">
-                    <AlertTriangle className="w-5 h-5" />
+              {/* NCF Sources */}
+              {result.sources.length > 0 && (
+                <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+                      <BookOpen className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-serif font-bold text-stone-900">NCF Sources</h3>
                   </div>
-                  <h3 className="font-serif font-bold text-stone-900">Common Pitfalls</h3>
+                  <ul className="space-y-2">
+                    {result.sources.map((source: string, i: number) => (
+                      <li key={i} className="text-stone-600 text-sm flex gap-2">
+                        <span className="text-emerald-500 flex-shrink-0">📄</span>
+                        <span>{source}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-3">
-                  <li className="flex gap-3 text-stone-700">
-                    <span className="text-rose-500 font-bold">×</span>
-                    <span>Thinking all cells have walls.</span>
-                  </li>
-                  <li className="flex gap-3 text-stone-700">
-                    <span className="text-emerald-600 font-bold">✓</span>
-                    <span>Clarify: Only plants/bacteria need the rigid support.</span>
-                  </li>
-                </ul>
-              </div>
+              )}
 
-              {/* Bloom's Questions */}
-              <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
-                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
-                    <Layers className="w-5 h-5" />
+              {/* Explore Further / Follow-ups */}
+              {result.suggested_followups.length > 0 && (
+                <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                      <Layers className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-serif font-bold text-stone-900">Explore Further</h3>
                   </div>
-                  <h3 className="font-serif font-bold text-stone-900">Check Questions</h3>
+                  <div className="space-y-3">
+                    {result.suggested_followups.map((q: string, i: number) => (
+                      <div key={i} className={i > 0 ? "border-t border-stone-100 pt-3" : ""}>
+                        <p className="text-stone-700 text-sm flex gap-2">
+                          <span className="text-purple-400 flex-shrink-0">→</span>
+                          <span>{q}</span>
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-4">
-                   <div>
-                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">Remember</span>
-                      <p className="text-stone-800">What is the function of the nucleus?</p>
-                   </div>
-                   <div className="border-t border-stone-100 pt-3">
-                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">Analyze</span>
-                      <p className="text-stone-800">Why don't animal cells burst when filled with water?</p>
-                   </div>
-                </div>
-              </div>
+              )}
 
             </div>
 
             <div className="pt-4 flex gap-4">
               <button 
-                onClick={() => setStep("input")}
+                onClick={() => { setStep("input"); setResult(null); }}
                 className="flex-1 py-4 rounded-lg border border-stone-200 text-stone-600 font-medium hover:bg-stone-50 transition-colors"
               >
                 New Plan
               </button>
-              <button className="flex-1 py-4 rounded-lg bg-stone-900 text-white font-medium hover:bg-stone-800 transition-colors flex items-center justify-center gap-2">
-                <BookOpen className="w-4 h-4" />
-                Start Class
-              </button>
+              <Link href="/">
+                <button className="flex-1 py-4 rounded-lg bg-stone-900 text-white font-medium hover:bg-stone-800 transition-colors flex items-center justify-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  Start Class
+                </button>
+              </Link>
             </div>
           </motion.div>
         )}

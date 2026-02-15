@@ -121,6 +121,57 @@ export async function registerRoutes(
     }
   });
 
+  // Lesson Prep - Lyzr NCF RAG endpoint
+  app.post("/api/prep", authMiddleware, async (req: any, res) => {
+    try {
+      const { subject, topic, class: classLevel } = req.body;
+
+      if (!subject || !topic) {
+        return res.status(400).json({ message: "Subject and topic are required" });
+      }
+
+      const prompt = `I am a teacher preparing a lesson. Please give me a comprehensive teaching strategy for:
+
+Subject: ${subject}
+Topic: ${topic}
+Class Level: ${classLevel || "Not specified"}
+
+Based on the National Curriculum Framework (NCF), provide:
+1. A clear learning outcome for this lesson
+2. An engaging hook or opening activity (5 minutes) to capture student interest
+3. Common misconceptions students have about this topic and how to address them
+4. Check questions at different Bloom's taxonomy levels (Remember, Understand, Analyze, Apply)
+5. Recommended teaching approach and pedagogy aligned with NCF guidelines`;
+
+      const LYZR_API_KEY = process.env.LYZR_API_KEY || "sk-default-MNBhHUHTom982uvMLDHvuMFnoR1p3MbH";
+      const LYZR_AGENT_ID = process.env.LYZR_AGENT_ID || "69916c349f359fed2b606ef7";
+
+      const response = await fetch("https://agent-prod.studio.lyzr.ai/v3/inference/chat/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": LYZR_API_KEY,
+        },
+        body: JSON.stringify({
+          user_id: "teacher-user",
+          agent_id: LYZR_AGENT_ID,
+          session_id: `prep-${Date.now()}`,
+          message: prompt,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Lyzr API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error("Error generating prep:", error);
+      res.status(500).json({ message: "Failed to generate lesson plan. Please try again." });
+    }
+  });
+
   setupCrisisWebSocket(httpServer);
 
   return httpServer;
