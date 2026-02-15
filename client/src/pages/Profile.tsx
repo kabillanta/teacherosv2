@@ -10,6 +10,7 @@ type ClassSession = {
   id: string;
   time: string;
   className: string;
+  section?: string;
   subject: string;
   topic?: string; // Optional, can be added later from Home
 };
@@ -24,14 +25,14 @@ export default function Profile() {
   });
 
   const [timetable, setTimetable] = useState<ClassSession[]>([
-    { id: "1", time: "09:30", className: "8-B", subject: "Biology", topic: "Cell Structure" },
-    { id: "2", time: "11:00", className: "10-A", subject: "Chemistry" }, // No topic yet
-    { id: "3", time: "14:00", className: "9-C", subject: "Biology" }
+    { id: "1", time: "09:30", className: "8", section: "B", subject: "Biology", topic: "Cell Structure" },
+    { id: "2", time: "11:00", className: "10", section: "A", subject: "Chemistry" }, // No topic yet
+    { id: "3", time: "14:00", className: "9", section: "C", subject: "Biology" }
   ]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingClass, setIsAddingClass] = useState(false);
-  const [newClass, setNewClass] = useState({ time: "", className: "", subject: "" });
+  const [newClass, setNewClass] = useState({ time: "", className: "", section: "", subject: "" });
 
   // Load from local storage on mount
   useEffect(() => {
@@ -73,7 +74,7 @@ export default function Profile() {
     // Sort by time
     const updated = [...timetable, session].sort((a, b) => a.time.localeCompare(b.time));
     setTimetable(updated);
-    setNewClass({ time: "", className: "", subject: "" });
+    setNewClass({ time: "", className: "", section: "", subject: "" });
     setIsAddingClass(false);
   };
 
@@ -179,17 +180,28 @@ export default function Profile() {
                       </div>
                       <div className="space-y-2">
                          <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Class</label>
-                         <div className="relative">
-                           <select 
-                             className="w-full p-4 bg-white border border-stone-200 rounded-xl font-medium text-stone-900 focus:outline-none focus:border-stone-900 transition-colors appearance-none"
-                             value={newClass.className}
-                             onChange={(e) => setNewClass({...newClass, className: e.target.value})}
-                           >
-                              <option value="">Select</option>
-                              {classOptions.map(c => <option key={c} value={c}>{c}</option>)}
-                           </select>
-                           <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
-                             <ChevronRight className="w-4 h-4 rotate-90" />
+                         <div className="flex gap-2">
+                           <div className="relative flex-1">
+                             <select 
+                               className="w-full p-4 bg-white border border-stone-200 rounded-xl font-medium text-stone-900 focus:outline-none focus:border-stone-900 transition-colors appearance-none"
+                               value={newClass.className}
+                               onChange={(e) => setNewClass({...newClass, className: e.target.value})}
+                             >
+                                <option value="">Grade</option>
+                                {classOptions.map(c => <option key={c} value={c}>{c}</option>)}
+                             </select>
+                             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
+                               <ChevronRight className="w-4 h-4 rotate-90" />
+                             </div>
+                           </div>
+                           <div className="w-24">
+                             <input 
+                               placeholder="Sec"
+                               className="w-full p-4 bg-white border border-stone-200 rounded-xl font-medium text-stone-900 focus:outline-none focus:border-stone-900 transition-colors text-center"
+                               value={newClass.section}
+                               onChange={(e) => setNewClass({...newClass, section: e.target.value.toUpperCase()})}
+                               maxLength={2}
+                             />
                            </div>
                          </div>
                       </div>
@@ -231,7 +243,9 @@ export default function Profile() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-serif font-semibold text-stone-800">{session.subject}</span>
-                      <span className="text-xs px-2 py-0.5 bg-stone-100 rounded text-stone-500 font-medium">Class {session.className}</span>
+                      <span className="text-xs px-2 py-0.5 bg-stone-100 rounded text-stone-500 font-medium">
+                        Class {session.className}{session.section ? `-${session.section}` : ''}
+                      </span>
                     </div>
                     {session.topic ? (
                       <p className="text-xs text-stone-500 mt-0.5 truncate max-w-[150px]">Hook: {session.topic}</p>
