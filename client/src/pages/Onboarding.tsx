@@ -146,7 +146,53 @@ export default function Onboarding() {
                  {subj}
                </button>
              ))}
+             
+             {/* Other Option */}
+             <button
+                 onClick={() => {
+                    // Toggle "Other" mode or add a placeholder
+                    const hasCustom = formData.subjects.some(s => !["Math", "Science", "English", "Social Studies", "Hindi", "Arts", "Computer"].includes(s));
+                    if (hasCustom) {
+                        // Remove custom subjects
+                        const predefOnly = formData.subjects.filter(s => ["Math", "Science", "English", "Social Studies", "Hindi", "Arts", "Computer"].includes(s));
+                        setFormData({...formData, subjects: predefOnly});
+                    } else {
+                        // Add empty placeholder to trigger input mode
+                        setFormData({...formData, subjects: [...formData.subjects, ""]});
+                    }
+                 }}
+                 className={`px-5 py-3 rounded-full border text-base font-medium transition-all ${
+                    formData.subjects.some(s => !["Math", "Science", "English", "Social Studies", "Hindi", "Arts", "Computer"].includes(s))
+                    ? "bg-stone-900 text-white border-stone-900 shadow-md" 
+                    : "bg-white border-stone-200 text-stone-600 hover:border-stone-400"
+                 }`}
+               >
+                 Other
+               </button>
            </div>
+           
+           {/* Custom Subject Input */}
+           {formData.subjects.some(s => !["Math", "Science", "English", "Social Studies", "Hindi", "Arts", "Computer"].includes(s)) && (
+               <motion.div 
+                 initial={{ opacity: 0, y: 10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 className="mt-2"
+               >
+                   <input 
+                     type="text"
+                     autoFocus
+                     placeholder="Type your subject (e.g. Robotics)..."
+                     value={formData.subjects.find(s => !["Math", "Science", "English", "Social Studies", "Hindi", "Arts", "Computer"].includes(s)) || ""}
+                     onChange={(e) => {
+                         const val = e.target.value;
+                         const predef = formData.subjects.filter(s => ["Math", "Science", "English", "Social Studies", "Hindi", "Arts", "Computer"].includes(s));
+                         setFormData({...formData, subjects: [...predef, val]});
+                     }}
+                     className="w-full p-4 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900 shadow-sm"
+                   />
+               </motion.div>
+           )}
+
            <p className="text-stone-400 text-sm">Select all that apply.</p>
         </div>
       )
