@@ -1,18 +1,31 @@
-import type { Express } from "express";
+import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
-import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { storage } from "./storage";
 import { insertTeacherProfileSchema, insertTimetableSessionSchema, insertReflectionSchema } from "@shared/schema";
 import { setupCrisisWebSocket } from "./crisis-ws";
+
+const isReplit = !!process.env.REPL_ID;
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  await setupAuth(app);
-  registerAuthRoutes(app);
+  let authMiddleware: RequestHandler;
 
-  app.get("/api/profile", isAuthenticated, async (req: any, res) => {
+  if (isReplit) {
+    const { setupAuth, registerAuthRoutes, isAuthenticated } = await import("./replit_integrations/auth");
+    await setupAuth(app);
+    registerAuthRoutes(app);
+    authMiddleware = isAuthenticated;
+  } else {
+    const { setupLocalAuth, registerLocalAuthRoutes, localIsAuthenticated } = await import("./local-auth");
+    await setupLocalAuth(app);
+    registerLocalAuthRoutes(app);
+    authMiddleware = localIsAuthenticated;
+    console.log("Running in LOCAL mode - auto-login at /api/login");
+  }
+
+  app.get("/api/profile", authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const profile = await storage.getProfile(userId);
@@ -23,7 +36,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/profile", isAuthenticated, async (req: any, res) => {
+  app.post("/api/profile", authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const data = insertTeacherProfileSchema.parse({ ...req.body, userId });
@@ -35,7 +48,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/timetable", isAuthenticated, async (req: any, res) => {
+  app.get("/api/timetable", authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const sessions = await storage.getTimetable(userId);
@@ -46,7 +59,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/timetable", isAuthenticated, async (req: any, res) => {
+  app.post("/api/timetable", authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const data = insertTimetableSessionSchema.parse({ ...req.body, userId });
@@ -58,7 +71,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/timetable/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/timetable/:id", authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const id = parseInt(req.params.id);
@@ -73,7 +86,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/timetable/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/timetable/:id", authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const id = parseInt(req.params.id);
@@ -85,7 +98,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/reflections", isAuthenticated, async (req: any, res) => {
+  app.get("/api/reflections", authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const entries = await storage.getReflections(userId);
@@ -96,7 +109,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/reflections", isAuthenticated, async (req: any, res) => {
+  app.post("/api/reflections", authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const data = insertReflectionSchema.parse({ ...req.body, userId });

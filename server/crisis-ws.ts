@@ -2,13 +2,21 @@ import { WebSocketServer, WebSocket } from "ws";
 import type { Server } from "http";
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY,
-  httpOptions: {
-    apiVersion: "",
-    baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL,
-  },
-});
+const isReplit = !!process.env.REPL_ID;
+
+const aiConfig = isReplit
+  ? {
+      apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY,
+      httpOptions: {
+        apiVersion: "",
+        baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL,
+      },
+    }
+  : {
+      apiKey: process.env.GEMINI_API_KEY || "",
+    };
+
+const ai = new GoogleGenAI(aiConfig);
 
 const CRISIS_SYSTEM_PROMPT = `You are an expert classroom crisis support AI for Indian school teachers. You provide IMMEDIATE, actionable advice when a teacher is facing a difficult classroom situation.
 
