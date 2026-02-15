@@ -1,21 +1,66 @@
 import { Link } from "wouter";
 import Layout from "@/components/Layout";
 import { motion } from "framer-motion";
-import { Zap, BookOpen, BarChart3, Bell, ArrowRight, Quote, User, Edit2, Check } from "lucide-react";
+import { Zap, BookOpen, BarChart3, Bell, ArrowRight, Quote, User, Edit2, Check, Plus, AlertCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // @ts-ignore
 import logo from "@/assets/logo.png";
 
-export default function Home() {
-  const [upNext, setUpNext] = useState({
-    title: "Cell Structure",
-    desc: "Students often confuse cell walls with membranes. We have a 30s analogy to fix this.",
-    time: "9:30 AM"
-  });
+type ClassSession = {
+  id: string;
+  time: string;
+  className: string;
+  subject: string;
+  topic?: string;
+};
 
-  const [editForm, setEditForm] = useState(upNext);
-  const [isOpen, setIsOpen] = useState(false);
+export default function Home() {
+  const [nextClass, setNextClass] = useState<ClassSession | null>(null);
+  const [topicInput, setTopicInput] = useState("");
+  const [isAddingTopic, setIsAddingTopic] = useState(false);
+
+  // Simulate fetching the "Next Class" from the profile timetable
+  useEffect(() => {
+    const saved = localStorage.getItem("teacherOS_timetable");
+    if (saved) {
+      const schedule: ClassSession[] = JSON.parse(saved);
+      // For this prototype, we'll just grab the first one that doesn't have a topic, or just the first one.
+      // In a real app, we'd compare with Current Time.
+      // Let's find the first class.
+      if (schedule.length > 0) {
+          // Let's try to find a class without a topic to demonstrate the "Add Topic" flow
+          const incomplete = schedule.find(s => !s.topic);
+          setNextClass(incomplete || schedule[0]);
+      }
+    } else {
+        // Fallback default if no profile set up yet
+        setNextClass({
+            id: "default",
+            time: "09:30",
+            className: "8-B",
+            subject: "Biology",
+            topic: "Cell Structure" 
+        })
+    }
+  }, []);
+
+  const saveTopic = () => {
+    if (!nextClass) return;
+    
+    // Update local state
+    const updated = { ...nextClass, topic: topicInput };
+    setNextClass(updated);
+    setIsAddingTopic(false);
+
+    // Update global storage so Profile syncs
+    const saved = localStorage.getItem("teacherOS_timetable");
+    if (saved) {
+        const schedule: ClassSession[] = JSON.parse(saved);
+        const newSchedule = schedule.map(s => s.id === nextClass.id ? { ...s, topic: topicInput } : s);
+        localStorage.setItem("teacherOS_timetable", JSON.stringify(newSchedule));
+    }
+  };
 
   const container = {
     hidden: { opacity: 0 },
@@ -51,80 +96,89 @@ export default function Home() {
           </button>
         </header>
 
-        {/* Primary Action / Insight */}
+        {/* Dynamic Up Next Card */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#2D3339] text-[#FDFCF8] p-6 rounded-2xl shadow-xl relative overflow-hidden group cursor-pointer"
+          className={`p-6 rounded-2xl shadow-xl relative overflow-hidden group cursor-pointer transition-all ${
+              !nextClass?.topic ? 'bg-[#E54D2E]' : 'bg-[#2D3339]'
+          }`}
         >
-          <div className="relative z-10">
-            <div className="flex justify-between items-start mb-4">
-               <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-xs font-medium tracking-wide text-[#FDFCF8]/90 border border-white/10">
-                Up Next • {upNext.time}
-              </span>
-              <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogTrigger asChild>
-                   <button className="p-1.5 rounded-full hover:bg-white/10 transition-colors text-white/50 hover:text-white">
-                     <Edit2 className="w-4 h-4" />
-                   </button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="font-serif">Update Schedule</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-stone-500">Next Class Topic</label>
-                      <input 
-                        className="w-full p-3 border border-stone-200 rounded-lg" 
-                        value={editForm.title}
-                        onChange={(e) => setEditForm({...editForm, title: e.target.value})}
-                      />
-                    </div>
-                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-stone-500">Insight/Hook</label>
-                      <textarea 
-                        className="w-full p-3 border border-stone-200 rounded-lg" 
-                        value={editForm.desc}
-                        onChange={(e) => setEditForm({...editForm, desc: e.target.value})}
-                      />
-                    </div>
-                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-stone-500">Time</label>
-                      <input 
-                        type="time"
-                        className="w-full p-3 border border-stone-200 rounded-lg" 
-                        value={editForm.time}
-                        onChange={(e) => setEditForm({...editForm, time: e.target.value})}
-                      />
-                    </div>
-                    <button 
-                      onClick={() => {
-                        setUpNext(editForm);
-                        setIsOpen(false);
-                      }}
-                      className="w-full py-3 bg-stone-900 text-white rounded-lg font-medium flex items-center justify-center gap-2"
-                    >
-                      <Check className="w-4 h-4" /> Save Changes
-                    </button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-            
-            <Link href="/prep">
-              <div>
-                <h2 className="text-2xl font-serif mb-2">{upNext.title}</h2>
-                <p className="text-[#FDFCF8]/70 text-sm mb-6 max-w-[80%]">
-                  {upNext.desc}
-                </p>
-                
-                <div className="flex items-center gap-2 text-sm font-medium hover:gap-3 transition-all text-white">
-                  Review Plan <ArrowRight className="w-4 h-4" />
+          {nextClass ? (
+              <div className="relative z-10 text-[#FDFCF8]">
+                <div className="flex justify-between items-start mb-4">
+                   <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-xs font-medium tracking-wide text-[#FDFCF8]/90 border border-white/10">
+                    Up Next • {nextClass.time}
+                  </span>
+                  {!nextClass.topic && (
+                      <span className="animate-pulse flex items-center gap-1 text-xs font-bold uppercase tracking-widest bg-white/20 px-2 py-1 rounded">
+                          <AlertCircle className="w-3 h-3" /> Action Needed
+                      </span>
+                  )}
                 </div>
+                
+                {nextClass.topic ? (
+                    <Link href="/prep">
+                      <div>
+                        <h2 className="text-2xl font-serif mb-2">{nextClass.subject}: {nextClass.topic}</h2>
+                        <p className="text-[#FDFCF8]/70 text-sm mb-6 max-w-[90%]">
+                           Class {nextClass.className}. Tap to review the generated lesson plan and hook.
+                        </p>
+                        
+                        <div className="flex items-center gap-2 text-sm font-medium hover:gap-3 transition-all text-white">
+                          Review Plan <ArrowRight className="w-4 h-4" />
+                        </div>
+                      </div>
+                    </Link>
+                ) : (
+                    <div>
+                        <h2 className="text-2xl font-serif mb-2">{nextClass.subject} • Class {nextClass.className}</h2>
+                        <p className="text-[#FDFCF8]/90 text-sm mb-6 max-w-[90%] font-medium">
+                           You haven't planned this lesson yet. What are you teaching?
+                        </p>
+                        
+                        <Dialog open={isAddingTopic} onOpenChange={setIsAddingTopic}>
+                            <DialogTrigger asChild>
+                                <button className="w-full bg-white text-[#E54D2E] py-3 rounded-lg font-bold flex items-center justify-center gap-2 shadow-sm hover:bg-stone-50 transition-colors">
+                                    <Plus className="w-4 h-4" /> Add Topic & Generate
+                                </button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle className="font-serif">Plan Lesson for {nextClass.subject}</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-stone-500">What is the topic?</label>
+                                        <input 
+                                            placeholder="e.g. Photosynthesis, Trigonometry..."
+                                            className="w-full p-3 border border-stone-200 rounded-lg text-lg font-serif" 
+                                            value={topicInput}
+                                            onChange={(e) => setTopicInput(e.target.value)}
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <button 
+                                        onClick={saveTopic}
+                                        disabled={!topicInput}
+                                        className="w-full py-3 bg-stone-900 text-white rounded-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+                                    >
+                                        <Zap className="w-4 h-4" /> Generate 30s Plan
+                                    </button>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+                )}
               </div>
-            </Link>
-          </div>
+          ) : (
+              <div className="relative z-10 text-white/50 text-center py-8">
+                  <p>No upcoming classes in schedule.</p>
+                  <Link href="/profile">
+                      <button className="mt-4 text-white underline">Add to Timetable</button>
+                  </Link>
+              </div>
+          )}
           
           {/* Subtle Texture */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl opacity-50"></div>

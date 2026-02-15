@@ -1,11 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, User, Book, School, Wifi, Monitor, Check, ChevronRight, Settings, Users } from "lucide-react";
+import { ArrowLeft, User, Book, School, Wifi, Monitor, Check, Settings, Users, Calendar, Plus, Trash2, Clock } from "lucide-react";
 import { Link } from "wouter";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+
+// Simple type for our timetable
+type ClassSession = {
+  id: string;
+  time: string;
+  className: string;
+  subject: string;
+  topic?: string; // Optional, can be added later from Home
+};
 
 export default function Profile() {
-  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "Priya Sharma",
     schoolType: "CBSE",
@@ -14,7 +23,28 @@ export default function Profile() {
     resources: ["Smartboard", "Internet"]
   });
 
+  const [timetable, setTimetable] = useState<ClassSession[]>([
+    { id: "1", time: "09:30", className: "8-B", subject: "Biology", topic: "Cell Structure" },
+    { id: "2", time: "11:00", className: "10-A", subject: "Chemistry" }, // No topic yet
+    { id: "3", time: "14:00", className: "9-C", subject: "Biology" }
+  ]);
+
   const [isEditing, setIsEditing] = useState(false);
+  const [isAddingClass, setIsAddingClass] = useState(false);
+  const [newClass, setNewClass] = useState({ time: "", className: "", subject: "" });
+
+  // Load from local storage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("teacherOS_timetable");
+    if (saved) {
+      setTimetable(JSON.parse(saved));
+    }
+  }, []);
+
+  // Save to local storage whenever changed
+  useEffect(() => {
+    localStorage.setItem("teacherOS_timetable", JSON.stringify(timetable));
+  }, [timetable]);
 
   const toggleSelection = (field: keyof typeof formData, value: string) => {
     // @ts-ignore
@@ -23,7 +53,6 @@ export default function Profile() {
       ? current.filter(item => item !== value)
       : [...current, value];
     
-    // Custom sort for classes: KG, 1, 2, ..., 12
     if (field === "classes") {
         updated.sort((a, b) => {
             if (a === "KG") return -1;
@@ -33,6 +62,23 @@ export default function Profile() {
     }
     
     setFormData({ ...formData, [field]: updated });
+  };
+
+  const addClass = () => {
+    if (!newClass.time || !newClass.className || !newClass.subject) return;
+    const session: ClassSession = {
+      id: Date.now().toString(),
+      ...newClass
+    };
+    // Sort by time
+    const updated = [...timetable, session].sort((a, b) => a.time.localeCompare(b.time));
+    setTimetable(updated);
+    setNewClass({ time: "", className: "", subject: "" });
+    setIsAddingClass(false);
+  };
+
+  const removeClass = (id: string) => {
+    setTimetable(timetable.filter(t => t.id !== id));
   };
 
   const classOptions = ["KG", ...Array.from({length: 12}, (_, i) => (i + 1).toString())];
@@ -50,7 +96,7 @@ export default function Profile() {
           </Link>
           <div className="text-center">
              <h1 className="font-serif text-xl text-stone-900">Teacher Profile</h1>
-             <p className="text-xs font-medium text-stone-400 uppercase tracking-widest">Your Classroom Context</p>
+             <p className="text-xs font-medium text-stone-400 uppercase tracking-widest">Your Context</p>
           </div>
           <button 
             onClick={() => setIsEditing(!isEditing)}
@@ -102,6 +148,103 @@ export default function Profile() {
                </div>
             </div>
           </div>
+
+          {/* Timetable Section - NEW */}
+          <section className="bg-stone-50 p-6 rounded-xl border border-stone-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-serif text-lg text-stone-900 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-stone-400" />
+                Daily Schedule
+              </h3>
+              <Dialog open={isAddingClass} onOpenChange={setIsAddingClass}>
+                <DialogTrigger asChild>
+                  <button className="p-2 rounded-full bg-white border border-stone-200 text-stone-600 hover:bg-stone-100 shadow-sm transition-colors">
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="font-serif">Add Class Session</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                         <label className="text-xs font-bold text-stone-400 uppercase">Time</label>
+                         <input 
+                           type="time" 
+                           className="w-full p-3 border border-stone-200 rounded-lg"
+                           value={newClass.time}
+                           onChange={(e) => setNewClass({...newClass, time: e.target.value})}
+                         />
+                      </div>
+                      <div className="space-y-2">
+                         <label className="text-xs font-bold text-stone-400 uppercase">Class</label>
+                         <select 
+                           className="w-full p-3 border border-stone-200 rounded-lg bg-white"
+                           value={newClass.className}
+                           onChange={(e) => setNewClass({...newClass, className: e.target.value})}
+                         >
+                            <option value="">Select</option>
+                            {classOptions.map(c => <option key={c} value={c}>{c}</option>)}
+                         </select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-xs font-bold text-stone-400 uppercase">Subject</label>
+                       <select 
+                         className="w-full p-3 border border-stone-200 rounded-lg bg-white"
+                         value={newClass.subject}
+                         onChange={(e) => setNewClass({...newClass, subject: e.target.value})}
+                       >
+                          <option value="">Select</option>
+                          {formData.subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                       </select>
+                    </div>
+                    <button 
+                      onClick={addClass}
+                      className="w-full py-3 bg-stone-900 text-white rounded-lg font-medium"
+                    >
+                      Add to Schedule
+                    </button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="space-y-3">
+              {timetable.map((session, index) => (
+                <div key={session.id} className="flex items-center gap-4 bg-white p-4 rounded-lg border border-stone-200 shadow-sm group">
+                  <div className="flex flex-col items-center min-w-[3rem]">
+                    <span className="text-sm font-bold text-stone-900">{session.time}</span>
+                    <div className="h-8 w-px bg-stone-200 my-1 group-last:hidden"></div>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-serif font-semibold text-stone-800">{session.subject}</span>
+                      <span className="text-xs px-2 py-0.5 bg-stone-100 rounded text-stone-500 font-medium">Class {session.className}</span>
+                    </div>
+                    {session.topic ? (
+                      <p className="text-xs text-stone-500 mt-0.5 truncate max-w-[150px]">Hook: {session.topic}</p>
+                    ) : (
+                      <p className="text-xs text-stone-400 italic mt-0.5">No topic set</p>
+                    )}
+                  </div>
+                  <button 
+                    onClick={() => removeClass(session.id)}
+                    className="p-2 text-stone-300 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+              
+              {timetable.length === 0 && (
+                <div className="text-center py-8 text-stone-400 text-sm italic">
+                  No classes scheduled. Add one above.
+                </div>
+              )}
+            </div>
+          </section>
 
           {/* Context Settings */}
           <div className="space-y-8">
