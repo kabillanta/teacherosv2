@@ -200,7 +200,7 @@ export default function Onboarding() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDFCF8] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#FDFCF8] flex flex-col items-center justify-center p-5 md:p-6 relative overflow-hidden">
         {/* Background Decorative Elements */}
         <div className="absolute top-0 left-0 w-64 h-64 bg-stone-100 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 opacity-50" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-stone-100 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 opacity-50" />

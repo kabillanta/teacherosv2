@@ -86,7 +86,7 @@ export default function Profile() {
 
   return (
     <Layout>
-      <div className="p-6 pt-12 min-h-screen pb-32">
+      <div className="p-5 pt-8 md:p-6 md:pt-12 min-h-screen pb-32">
         
         {/* Navigation Header */}
         <div className="flex items-center justify-between mb-8">

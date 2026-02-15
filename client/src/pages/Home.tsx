@@ -86,7 +86,7 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="p-8 pt-12 space-y-10">
+      <div className="p-5 pt-8 md:p-8 md:pt-12 space-y-8 md:space-y-10">
         
         {/* Minimal Header */}
         <header className="flex justify-between items-start">

@@ -29,7 +29,7 @@ export default function Crisis() {
 
   // Crisis mode needs to be IMMERSIVE and DISTRACTION FREE
   return (
-    <div className="min-h-screen bg-[#FDFCF8] flex flex-col font-sans max-w-md mx-auto relative overflow-hidden">
+    <div className="min-h-screen bg-[#FDFCF8] flex flex-col font-sans w-full md:max-w-md mx-auto relative overflow-hidden">
       
       {/* Escape Hatch */}
       <div className="absolute top-6 right-6 z-50">

@@ -13,12 +13,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden relative font-sans border-x border-stone-200">
-      <main className="flex-1 overflow-y-auto pb-24 scrollbar-hide">
+    <div className="min-h-screen bg-[#FDFCF8] flex flex-col w-full md:max-w-md mx-auto shadow-2xl overflow-hidden relative font-sans md:border-x border-stone-200">
+      <main className="flex-1 overflow-y-auto pb-24 scrollbar-hide w-full">
         {children}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#FDFCF8]/95 backdrop-blur-md border-t border-stone-200 px-6 py-4 pb-8 safe-area-bottom z-50 max-w-md mx-auto">
+      <nav className="fixed bottom-0 left-0 right-0 bg-[#FDFCF8]/95 backdrop-blur-md border-t border-stone-200 px-6 py-4 pb-8 safe-area-bottom z-50 w-full md:max-w-md mx-auto">
         <div className="flex justify-between items-end">
           {navItems.map((item) => {
             const isActive = location === item.path;
