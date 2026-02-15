@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, User, Book, School, Wifi, Monitor, Check, Settings, Users, Calendar, Plus, Trash2, Clock } from "lucide-react";
+import { ArrowLeft, User, Book, School, Wifi, Monitor, Check, Settings, Users, Calendar, Plus, Trash2, Clock, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
