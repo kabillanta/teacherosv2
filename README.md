@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">🪷 GuruShakti — AI-Powered Teacher Companion</h1>
+  <h1 align="center">🪷 Teacher OS — AI-Powered Teacher Companion</h1>
   <p align="center">
     <strong>Empowering India's 9.7 million teachers with AI-driven classroom support, NCF-aligned lesson planning, and real-time crisis resolution.</strong>
   </p>
@@ -32,7 +32,7 @@ India has **9.7 million teachers** serving **265 million students** across 1.5 m
 
 The **National Curriculum Framework 2023 (NCF)** represents India's most ambitious education reform in decades — shifting from rote learning to competency-based education. But the framework's 700+ page document is dense, and teachers on the ground have **no practical tool** to translate NCF guidelines into daily classroom action.
 
-**GuruShakti bridges this gap.** It puts the entire NCF knowledge base in every teacher's pocket, accessible through voice, text, and a 30-second lesson planner.
+**Teacher OS bridges this gap.** It puts the entire NCF knowledge base in every teacher's pocket, accessible through voice, text, and a 30-second lesson planner.
 
 ---
 
@@ -239,7 +239,7 @@ Open **http://localhost:5000** 🚀
 
 ### For India's Teachers
 
-GuruShakti is built specifically for the **Indian classroom context**:
+Teacher OS is built specifically for the **Indian classroom context**:
 - 🇮🇳 Large class sizes (40–60 students)
 - 📋 Board exam pressure (CBSE, ICSE, State Boards)
 - 🌍 Mixed-ability classrooms
