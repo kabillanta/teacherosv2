@@ -162,47 +162,57 @@ export default function Profile() {
                     <Plus className="w-4 h-4" />
                   </button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="bg-[#FDFCF8] border-stone-200 shadow-2xl sm:max-w-[400px] w-[95%] rounded-2xl gap-6">
                   <DialogHeader>
-                    <DialogTitle className="font-serif">Add Class Session</DialogTitle>
+                    <DialogTitle className="font-serif text-2xl text-stone-900">Add Class Session</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4 py-4">
+                  <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                         <label className="text-xs font-bold text-stone-400 uppercase">Time</label>
+                         <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Time</label>
                          <input 
                            type="time" 
-                           className="w-full p-3 border border-stone-200 rounded-lg"
+                           className="w-full p-4 bg-white border border-stone-200 rounded-xl font-medium text-stone-900 focus:outline-none focus:border-stone-900 transition-colors appearance-none"
                            value={newClass.time}
                            onChange={(e) => setNewClass({...newClass, time: e.target.value})}
                          />
                       </div>
                       <div className="space-y-2">
-                         <label className="text-xs font-bold text-stone-400 uppercase">Class</label>
-                         <select 
-                           className="w-full p-3 border border-stone-200 rounded-lg bg-white"
-                           value={newClass.className}
-                           onChange={(e) => setNewClass({...newClass, className: e.target.value})}
-                         >
-                            <option value="">Select</option>
-                            {classOptions.map(c => <option key={c} value={c}>{c}</option>)}
-                         </select>
+                         <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Class</label>
+                         <div className="relative">
+                           <select 
+                             className="w-full p-4 bg-white border border-stone-200 rounded-xl font-medium text-stone-900 focus:outline-none focus:border-stone-900 transition-colors appearance-none"
+                             value={newClass.className}
+                             onChange={(e) => setNewClass({...newClass, className: e.target.value})}
+                           >
+                              <option value="">Select</option>
+                              {classOptions.map(c => <option key={c} value={c}>{c}</option>)}
+                           </select>
+                           <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
+                             <ChevronRight className="w-4 h-4 rotate-90" />
+                           </div>
+                         </div>
                       </div>
                     </div>
                     <div className="space-y-2">
-                       <label className="text-xs font-bold text-stone-400 uppercase">Subject</label>
-                       <select 
-                         className="w-full p-3 border border-stone-200 rounded-lg bg-white"
-                         value={newClass.subject}
-                         onChange={(e) => setNewClass({...newClass, subject: e.target.value})}
-                       >
-                          <option value="">Select</option>
-                          {formData.subjects.map(s => <option key={s} value={s}>{s}</option>)}
-                       </select>
+                       <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Subject</label>
+                       <div className="relative">
+                         <select 
+                           className="w-full p-4 bg-white border border-stone-200 rounded-xl font-medium text-stone-900 focus:outline-none focus:border-stone-900 transition-colors appearance-none"
+                           value={newClass.subject}
+                           onChange={(e) => setNewClass({...newClass, subject: e.target.value})}
+                         >
+                            <option value="">Select</option>
+                            {formData.subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                         </select>
+                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
+                           <ChevronRight className="w-4 h-4 rotate-90" />
+                         </div>
+                       </div>
                     </div>
                     <button 
                       onClick={addClass}
-                      className="w-full py-3 bg-stone-900 text-white rounded-lg font-medium"
+                      className="w-full py-4 bg-stone-900 text-white rounded-xl font-medium text-lg shadow-xl shadow-stone-900/10 hover:bg-stone-800 transition-all active:scale-[0.98]"
                     >
                       Add to Schedule
                     </button>
