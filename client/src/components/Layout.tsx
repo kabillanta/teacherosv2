@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Zap, BookOpen, BarChart3, Mic } from "lucide-react";
+import { Home, Zap, BookOpen, BarChart3, User } from "lucide-react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -9,7 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { icon: Zap, label: "Crisis", path: "/crisis", isCrisis: true },
     { icon: BookOpen, label: "Prep", path: "/prep" },
     { icon: BarChart3, label: "Reflect", path: "/reflect" },
-    { icon: Mic, label: "Speak", path: "/speak" },
+    { icon: User, label: "Profile", path: "/profile" },
   ];
 
   return (
