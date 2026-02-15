@@ -4,71 +4,63 @@ import { motion } from "framer-motion";
 import { Zap, BookOpen, BarChart3, Bell, ArrowRight, Quote, User, Edit2, Check, Plus, AlertCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getQueryFn, apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth";
 // @ts-ignore
 import logo from "@/assets/logo.png";
 
-type ClassSession = {
-  id: string;
+type TimetableSession = {
+  id: number;
   time: string;
   className: string;
+  section?: string | null;
   subject: string;
-  topic?: string;
+  topic?: string | null;
 };
 
 export default function Home() {
-  const [nextClass, setNextClass] = useState<ClassSession | null>(null);
   const [topicInput, setTopicInput] = useState("");
   const [isAddingTopic, setIsAddingTopic] = useState(false);
-  const [user, setUser] = useState({ name: "Teacher" });
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
 
-  // Check Onboarding & Load Data
+  const { data: profile, isLoading: profileLoading } = useQuery<any>({
+    queryKey: ["/api/profile"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+  });
+
+  const { data: timetable, isLoading: timetableLoading } = useQuery<TimetableSession[]>({
+    queryKey: ["/api/timetable"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+  });
+
+  const updateTopicMutation = useMutation({
+    mutationFn: async ({ id, topic }: { id: number; topic: string }) => {
+      await apiRequest("PATCH", `/api/timetable/${id}`, { topic });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/timetable"] });
+      setIsAddingTopic(false);
+      setTopicInput("");
+    },
+  });
+
   useEffect(() => {
-    const userStr = localStorage.getItem("teacherOS_user");
-    if (!userStr) {
-        setLocation("/onboarding");
-        return;
+    if (!profileLoading && profile === null) {
+      setLocation("/onboarding");
     }
-    setUser(JSON.parse(userStr));
+  }, [profile, profileLoading, setLocation]);
 
-    const saved = localStorage.getItem("teacherOS_timetable");
-    if (saved) {
-      const schedule: ClassSession[] = JSON.parse(saved);
-      // For this prototype, we'll just grab the first one that doesn't have a topic, or just the first one.
-      // In a real app, we'd compare with Current Time.
-      // Let's find the first class.
-      if (schedule.length > 0) {
-          // Let's try to find a class without a topic to demonstrate the "Add Topic" flow
-          const incomplete = schedule.find(s => !s.topic);
-          setNextClass(incomplete || schedule[0]);
-      }
-    } else {
-        // Fallback default if no profile set up yet
-        setNextClass({
-            id: "default",
-            time: "09:30",
-            className: "8-B",
-            subject: "Biology",
-            topic: "Cell Structure" 
-        })
-    }
-  }, []);
+  const nextClass = timetable && timetable.length > 0
+    ? timetable.find(s => !s.topic) || timetable[0]
+    : null;
+
+  const userName = profile?.name || "Teacher";
 
   const saveTopic = () => {
-    if (!nextClass) return;
-    
-    // Update local state
-    const updated = { ...nextClass, topic: topicInput };
-    setNextClass(updated);
-    setIsAddingTopic(false);
-
-    // Update global storage so Profile syncs
-    const saved = localStorage.getItem("teacherOS_timetable");
-    if (saved) {
-        const schedule: ClassSession[] = JSON.parse(saved);
-        const newSchedule = schedule.map(s => s.id === nextClass.id ? { ...s, topic: topicInput } : s);
-        localStorage.setItem("teacherOS_timetable", JSON.stringify(newSchedule));
-    }
+    if (!nextClass || !topicInput) return;
+    updateTopicMutation.mutate({ id: nextClass.id, topic: topicInput });
   };
 
   const container = {
@@ -84,17 +76,26 @@ export default function Home() {
     show: { opacity: 1, y: 0 }
   };
 
+  if (profileLoading || timetableLoading) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-12 h-12 border-4 border-stone-200 border-t-stone-800 rounded-full animate-spin"></div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="p-5 pt-8 md:p-8 md:pt-12 space-y-8 md:space-y-10">
         
-        {/* Minimal Header */}
         <header className="flex justify-between items-start">
           <div className="space-y-1">
             <h1 className="text-3xl font-serif text-stone-900 leading-none">Good Morning,</h1>
             <Link href="/profile">
                <div className="flex items-center gap-2 cursor-pointer group">
-                  <p className="text-stone-500 font-sans text-base group-hover:text-stone-700 transition-colors">{user.name}</p>
+                  <p className="text-stone-500 font-sans text-base group-hover:text-stone-700 transition-colors" data-testid="text-username">{userName}</p>
                   <User className="w-4 h-4 text-stone-400 group-hover:text-stone-600" />
                </div>
             </Link>
@@ -105,7 +106,6 @@ export default function Home() {
           </button>
         </header>
 
-        {/* Dynamic Up Next Card */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -169,10 +169,10 @@ export default function Home() {
                                     </div>
                                     <button 
                                         onClick={saveTopic}
-                                        disabled={!topicInput}
+                                        disabled={!topicInput || updateTopicMutation.isPending}
                                         className="w-full py-3 bg-stone-900 text-white rounded-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50"
                                     >
-                                        <Zap className="w-4 h-4" /> Generate 30s Plan
+                                        <Zap className="w-4 h-4" /> {updateTopicMutation.isPending ? "Saving..." : "Generate 30s Plan"}
                                     </button>
                                 </div>
                             </DialogContent>
@@ -189,11 +189,9 @@ export default function Home() {
               </div>
           )}
           
-          {/* Subtle Texture */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl opacity-50"></div>
         </motion.div>
 
-        {/* Modes Grid */}
         <div className="space-y-4">
           <h3 className="text-sm font-bold tracking-widest text-stone-400 uppercase">Tools</h3>
           
@@ -203,7 +201,6 @@ export default function Home() {
             animate="show"
             className="grid grid-cols-2 gap-4"
           >
-            {/* Crisis Card - Subtle but distinct */}
             <Link href="/crisis">
               <motion.div variants={item} className="paper-card p-5 rounded-xl border-l-4 border-l-red-500 hover:border-l-red-600 cursor-pointer h-40 flex flex-col justify-between group">
                 <div className="flex justify-between items-start">
@@ -218,7 +215,6 @@ export default function Home() {
               </motion.div>
             </Link>
 
-            {/* Reflect Card */}
             <Link href="/reflect">
               <motion.div variants={item} className="paper-card p-5 rounded-xl border-l-4 border-l-purple-500 hover:border-l-purple-600 cursor-pointer h-40 flex flex-col justify-between group">
                 <div className="flex justify-between items-start">
@@ -235,7 +231,6 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Weekly Quote/Insight */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

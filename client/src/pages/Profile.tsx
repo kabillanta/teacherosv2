@@ -4,51 +4,107 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, User, Book, School, Wifi, Monitor, Check, Settings, Users, Calendar, Plus, Trash2, Clock, ChevronRight, LogOut } from "lucide-react";
 import { Link } from "wouter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getQueryFn, apiRequest } from "@/lib/queryClient";
 
-// Simple type for our timetable
-type ClassSession = {
-  id: string;
+type TimetableSession = {
+  id: number;
   time: string;
   className: string;
-  section?: string;
+  section?: string | null;
   subject: string;
-  topic?: string; // Optional, can be added later from Home
+  topic?: string | null;
+};
+
+type ProfileData = {
+  id: number;
+  userId: string;
+  name: string;
+  schoolType: string;
+  subjects: string[];
+  classes: string[];
+  resources: string[];
 };
 
 export default function Profile() {
-  const [formData, setFormData] = useState({
-    name: "Priya Sharma",
-    schoolType: "CBSE",
-    subjects: ["Biology", "Chemistry"],
-    classes: ["8", "9", "10"],
-    resources: ["Smartboard", "Internet"]
+  const queryClient = useQueryClient();
+
+  const { data: profile, isLoading: profileLoading } = useQuery<ProfileData | null>({
+    queryKey: ["/api/profile"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
-  const [timetable, setTimetable] = useState<ClassSession[]>([
-    { id: "1", time: "09:30", className: "8", section: "B", subject: "Biology", topic: "Cell Structure" },
-    { id: "2", time: "11:00", className: "10", section: "A", subject: "Chemistry" }, // No topic yet
-    { id: "3", time: "14:00", className: "9", section: "C", subject: "Biology" }
-  ]);
+  const { data: timetable, isLoading: timetableLoading } = useQuery<TimetableSession[]>({
+    queryKey: ["/api/timetable"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+  });
+
+  const [formData, setFormData] = useState({
+    name: "Teacher",
+    schoolType: "CBSE",
+    subjects: [] as string[],
+    classes: [] as string[],
+    resources: [] as string[]
+  });
 
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingClass, setIsAddingClass] = useState(false);
   const [newClass, setNewClass] = useState({ time: "", className: "", section: "", subject: "", topic: "" });
 
-  // Load from local storage on mount
   useEffect(() => {
-    const saved = localStorage.getItem("teacherOS_timetable");
-    if (saved) {
-      setTimetable(JSON.parse(saved));
+    if (profile) {
+      setFormData({
+        name: profile.name || "Teacher",
+        schoolType: profile.schoolType || "CBSE",
+        subjects: profile.subjects || [],
+        classes: profile.classes || [],
+        resources: profile.resources || [],
+      });
     }
-  }, []);
+  }, [profile]);
 
-  // Save to local storage whenever changed
-  useEffect(() => {
-    localStorage.setItem("teacherOS_timetable", JSON.stringify(timetable));
-  }, [timetable]);
+  const saveProfileMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      await apiRequest("POST", "/api/profile", {
+        name: data.name,
+        schoolType: data.schoolType,
+        subjects: data.subjects,
+        classes: data.classes,
+        resources: data.resources,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+    },
+  });
+
+  const addSessionMutation = useMutation({
+    mutationFn: async (data: typeof newClass) => {
+      await apiRequest("POST", "/api/timetable", {
+        time: data.time,
+        className: data.className,
+        section: data.section || undefined,
+        subject: data.subject,
+        topic: data.topic || undefined,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/timetable"] });
+      setNewClass({ time: "", className: "", section: "", subject: "", topic: "" });
+      setIsAddingClass(false);
+    },
+  });
+
+  const deleteSessionMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/timetable/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/timetable"] });
+    },
+  });
 
   const toggleSelection = (field: keyof typeof formData, value: string) => {
-    // @ts-ignore
     const current = formData[field] as string[];
     const updated = current.includes(value)
       ? current.filter(item => item !== value)
@@ -67,28 +123,36 @@ export default function Profile() {
 
   const addClass = () => {
     if (!newClass.time || !newClass.className || !newClass.subject) return;
-    const session: ClassSession = {
-      id: Date.now().toString(),
-      ...newClass
-    };
-    // Sort by time
-    const updated = [...timetable, session].sort((a, b) => a.time.localeCompare(b.time));
-    setTimetable(updated);
-    setNewClass({ time: "", className: "", section: "", subject: "", topic: "" });
-    setIsAddingClass(false);
+    addSessionMutation.mutate(newClass);
   };
 
-  const removeClass = (id: string) => {
-    setTimetable(timetable.filter(t => t.id !== id));
+  const removeClass = (id: number) => {
+    deleteSessionMutation.mutate(id);
+  };
+
+  const saveChanges = () => {
+    saveProfileMutation.mutate(formData);
+    setIsEditing(false);
   };
 
   const classOptions = ["KG", ...Array.from({length: 12}, (_, i) => (i + 1).toString())];
+
+  const sessions = timetable || [];
+
+  if (profileLoading || timetableLoading) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-12 h-12 border-4 border-stone-200 border-t-stone-800 rounded-full animate-spin"></div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
       <div className="p-5 pt-8 md:p-6 md:pt-12 min-h-screen pb-32">
         
-        {/* Navigation Header */}
         <div className="flex items-center justify-between mb-8">
           <Link href="/">
             <button className="p-2 -ml-2 rounded-full hover:bg-stone-100 transition-colors text-stone-500">
@@ -109,7 +173,6 @@ export default function Profile() {
 
         <div className="space-y-8">
           
-          {/* Personal Identity Card */}
           <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-stone-50 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
             
@@ -126,7 +189,7 @@ export default function Profile() {
                     className="font-serif text-2xl font-bold text-stone-900 bg-transparent border-b border-stone-300 focus:border-stone-900 focus:outline-none w-full"
                   />
                 ) : (
-                  <h2 className="font-serif text-2xl font-bold text-stone-900">{formData.name}</h2>
+                  <h2 className="font-serif text-2xl font-bold text-stone-900" data-testid="text-profile-name">{formData.name}</h2>
                 )}
                 <p className="text-stone-500 text-sm">Senior Teacher • 8 Years Exp.</p>
               </div>
@@ -144,13 +207,12 @@ export default function Profile() {
                   <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">Classes</span>
                   <div className="flex items-center gap-2">
                     <Book className="w-4 h-4 text-stone-600" />
-                    <span className="font-medium text-stone-800">{formData.classes.join(", ")}</span>
+                    <span className="font-medium text-stone-800">{formData.classes.length > 0 ? formData.classes.join(", ") : "—"}</span>
                   </div>
                </div>
             </div>
           </div>
 
-          {/* Timetable Section - NEW */}
           <section className="bg-stone-50 p-6 rounded-xl border border-stone-200">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-serif text-lg text-stone-900 flex items-center gap-2">
@@ -233,9 +295,10 @@ export default function Profile() {
                     </div>
                     <button 
                       onClick={addClass}
+                      disabled={addSessionMutation.isPending}
                       className="w-full py-4 bg-stone-900 text-white rounded-xl font-medium text-lg shadow-xl shadow-stone-900/10 hover:bg-stone-800 transition-all active:scale-[0.98]"
                     >
-                      Add to Schedule
+                      {addSessionMutation.isPending ? "Adding..." : "Add to Schedule"}
                     </button>
                   </div>
                 </DialogContent>
@@ -243,7 +306,7 @@ export default function Profile() {
             </div>
 
             <div className="space-y-3">
-              {timetable.map((session, index) => (
+              {sessions.map((session) => (
                 <div key={session.id} className="flex items-center gap-4 bg-white p-4 rounded-lg border border-stone-200 shadow-sm group">
                   <div className="flex flex-col items-center min-w-[3rem]">
                     <span className="text-sm font-bold text-stone-900">{session.time}</span>
@@ -271,7 +334,7 @@ export default function Profile() {
                 </div>
               ))}
               
-              {timetable.length === 0 && (
+              {sessions.length === 0 && (
                 <div className="text-center py-8 text-stone-400 text-sm italic">
                   No classes scheduled. Add one above.
                 </div>
@@ -279,10 +342,8 @@ export default function Profile() {
             </div>
           </section>
 
-          {/* Context Settings */}
           <div className="space-y-8">
             
-            {/* Subjects */}
             <section>
                <h3 className="font-serif text-lg text-stone-900 mb-3 flex items-center gap-2">
                  <Book className="w-4 h-4 text-stone-400" />
@@ -309,7 +370,6 @@ export default function Profile() {
                </div>
             </section>
 
-            {/* Classes Taught - NOW EDITABLE KG-12 */}
             <section>
                <h3 className="font-serif text-lg text-stone-900 mb-3 flex items-center gap-2">
                  <Users className="w-4 h-4 text-stone-400" />
@@ -336,7 +396,6 @@ export default function Profile() {
                </div>
             </section>
 
-            {/* Classroom Resources - CRITICAL for AI Advice */}
             <section>
                <h3 className="font-serif text-lg text-stone-900 mb-3 flex items-center gap-2">
                  <Monitor className="w-4 h-4 text-stone-400" />
@@ -386,31 +445,31 @@ export default function Profile() {
               className="sticky bottom-24"
             >
               <button 
-                onClick={() => setIsEditing(false)}
+                onClick={saveChanges}
+                disabled={saveProfileMutation.isPending}
                 className="w-full py-4 rounded-lg bg-stone-900 text-white font-medium text-lg shadow-xl hover:bg-stone-800 transition-all flex items-center justify-center gap-2"
               >
                 <Check className="w-5 h-5" />
-                Save Changes
+                {saveProfileMutation.isPending ? "Saving..." : "Save Changes"}
               </button>
             </motion.div>
           )}
 
-          {/* Logout Section */}
           <div className="pt-8 border-t border-stone-200 mt-8">
             <button 
               onClick={() => {
                 if (confirm("Are you sure you want to log out?")) {
-                  localStorage.clear();
-                  window.location.href = "/onboarding";
+                  window.location.href = "/api/logout";
                 }
               }}
+              data-testid="button-logout"
               className="w-full py-3 rounded-xl border border-stone-200 text-stone-500 font-medium hover:bg-stone-50 hover:text-red-600 hover:border-red-200 transition-colors flex items-center justify-center gap-2"
             >
               <LogOut className="w-4 h-4" />
               Log Out
             </button>
             <p className="text-center text-[10px] text-stone-300 mt-4 uppercase tracking-widest">
-              TeacherOS v0.1 • Mockup Mode
+              TeacherOS v0.1
             </p>
           </div>
 

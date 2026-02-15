@@ -2,30 +2,47 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { ArrowRight, Check, School, User, Sparkles, BookOpen, ShieldAlert, BrainCircuit } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Onboarding() {
   const [step, setStep] = useState(0);
   const [, setLocation] = useLocation();
+  const [isSaving, setIsSaving] = useState(false);
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     name: "",
     schoolType: "CBSE",
     subjects: [] as string[]
   });
 
-  const completeOnboarding = () => {
-    localStorage.setItem("teacherOS_user", JSON.stringify(formData));
-    // Also init dummy timetable if empty
-    if (!localStorage.getItem("teacherOS_timetable")) {
-        const dummySchedule = [
-             { id: "1", time: "09:30", className: "8", section: "B", subject: formData.subjects[0] || "General", topic: "Introduction" }
-        ];
-        localStorage.setItem("teacherOS_timetable", JSON.stringify(dummySchedule));
+  const completeOnboarding = async () => {
+    setIsSaving(true);
+    try {
+      await apiRequest("POST", "/api/profile", {
+        name: formData.name,
+        schoolType: formData.schoolType,
+        subjects: formData.subjects,
+      });
+
+      await apiRequest("POST", "/api/timetable", {
+        time: "09:30",
+        className: "8",
+        section: "B",
+        subject: formData.subjects[0] || "General",
+        topic: "Introduction",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/timetable"] });
+      setLocation("/");
+    } catch (error) {
+      console.error("Error saving onboarding data:", error);
+      setIsSaving(false);
     }
-    setLocation("/");
   };
 
   const steps = [
-    // Step 0: Welcome / Philosophy
     {
       content: (
         <div className="flex flex-col items-center text-center space-y-8">
@@ -62,7 +79,6 @@ export default function Onboarding() {
         </div>
       )
     },
-    // Step 1: Name
     {
       content: (
         <div className="flex flex-col space-y-6 w-full">
@@ -86,7 +102,6 @@ export default function Onboarding() {
         </div>
       )
     },
-    // Step 2: Context
     {
       content: (
         <div className="flex flex-col space-y-6 w-full">
@@ -118,7 +133,6 @@ export default function Onboarding() {
         </div>
       )
     },
-     // Step 3: Subject (Quick Pick)
     {
       content: (
         <div className="flex flex-col space-y-6 w-full">
@@ -147,17 +161,13 @@ export default function Onboarding() {
                </button>
              ))}
              
-             {/* Other Option */}
              <button
                  onClick={() => {
-                    // Toggle "Other" mode or add a placeholder
                     const hasCustom = formData.subjects.some(s => !["Math", "Science", "English", "Social Studies", "Hindi", "Arts", "Computer"].includes(s));
                     if (hasCustom) {
-                        // Remove custom subjects
                         const predefOnly = formData.subjects.filter(s => ["Math", "Science", "English", "Social Studies", "Hindi", "Arts", "Computer"].includes(s));
                         setFormData({...formData, subjects: predefOnly});
                     } else {
-                        // Add empty placeholder to trigger input mode
                         setFormData({...formData, subjects: [...formData.subjects, ""]});
                     }
                  }}
@@ -171,7 +181,6 @@ export default function Onboarding() {
                </button>
            </div>
            
-           {/* Custom Subject Input */}
            {formData.subjects.some(s => !["Math", "Science", "English", "Social Studies", "Hindi", "Arts", "Computer"].includes(s)) && (
                <motion.div 
                  initial={{ opacity: 0, y: 10 }}
@@ -201,12 +210,10 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-screen bg-[#FDFCF8] flex flex-col items-center justify-center p-5 md:p-6 relative overflow-hidden">
-        {/* Background Decorative Elements */}
         <div className="absolute top-0 left-0 w-64 h-64 bg-stone-100 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 opacity-50" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-stone-100 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 opacity-50" />
 
         <div className="w-full max-w-md relative z-10 flex flex-col min-h-[500px]">
-            {/* Progress Bar */}
             <div className="flex gap-2 mb-12">
                 {steps.map((_, idx) => (
                     <div 
@@ -240,10 +247,10 @@ export default function Onboarding() {
                             completeOnboarding();
                         }
                     }}
-                    disabled={step === 1 && !formData.name}
+                    disabled={(step === 1 && !formData.name) || isSaving}
                     className="flex items-center gap-2 bg-stone-900 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-stone-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                    <span>{step === steps.length - 1 ? "Get Started" : "Continue"}</span>
+                    <span>{isSaving ? "Saving..." : step === steps.length - 1 ? "Get Started" : "Continue"}</span>
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>
