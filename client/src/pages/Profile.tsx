@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, User, Book, School, Wifi, Monitor, Check, Settings, Users, Calendar, Plus, Trash2, Clock, ChevronRight } from "lucide-react";
+import { ArrowLeft, User, Book, School, Wifi, Monitor, Check, Settings, Users, Calendar, Plus, Trash2, Clock, ChevronRight, LogOut } from "lucide-react";
 import { Link } from "wouter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -394,6 +394,25 @@ export default function Profile() {
               </button>
             </motion.div>
           )}
+
+          {/* Logout Section */}
+          <div className="pt-8 border-t border-stone-200 mt-8">
+            <button 
+              onClick={() => {
+                if (confirm("Are you sure you want to log out? This will clear your local data.")) {
+                  localStorage.clear();
+                  window.location.href = "/onboarding";
+                }
+              }}
+              className="w-full py-3 rounded-xl border border-stone-200 text-stone-500 font-medium hover:bg-stone-50 hover:text-red-600 hover:border-red-200 transition-colors flex items-center justify-center gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              Reset & Log Out
+            </button>
+            <p className="text-center text-[10px] text-stone-300 mt-4 uppercase tracking-widest">
+              TeacherOS v0.1 • Mockup Mode
+            </p>
+          </div>
 
         </div>
       </div>
