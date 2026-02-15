@@ -23,13 +23,19 @@ export default function Profile() {
       ? current.filter(item => item !== value)
       : [...current, value];
     
-    // Sort classes numerically if the field is classes
+    // Custom sort for classes: KG, 1, 2, ..., 12
     if (field === "classes") {
-        updated.sort((a, b) => parseInt(a) - parseInt(b));
+        updated.sort((a, b) => {
+            if (a === "KG") return -1;
+            if (b === "KG") return 1;
+            return parseInt(a) - parseInt(b);
+        });
     }
     
     setFormData({ ...formData, [field]: updated });
   };
+
+  const classOptions = ["KG", ...Array.from({length: 12}, (_, i) => (i + 1).toString())];
 
   return (
     <Layout>
@@ -107,7 +113,7 @@ export default function Profile() {
                  Subjects Taught
                </h3>
                <div className="flex flex-wrap gap-2">
-                 {["Math", "Biology", "Physics", "Chemistry", "English", "History"].map((subj) => {
+                 {["Math", "Biology", "Physics", "Chemistry", "English", "History", "Hindi", "Sanskrit", "Computer Science", "Social Studies", "EVS", "Art"].map((subj) => {
                    const isActive = formData.subjects.includes(subj);
                    return (
                      <button 
@@ -127,14 +133,14 @@ export default function Profile() {
                </div>
             </section>
 
-            {/* Classes Taught - NOW EDITABLE */}
+            {/* Classes Taught - NOW EDITABLE KG-12 */}
             <section>
                <h3 className="font-serif text-lg text-stone-900 mb-3 flex items-center gap-2">
                  <Users className="w-4 h-4 text-stone-400" />
                  Classes Taught
                </h3>
                <div className="flex flex-wrap gap-2">
-                 {["6", "7", "8", "9", "10", "11", "12"].map((cls) => {
+                 {classOptions.map((cls) => {
                    const isActive = formData.classes.includes(cls);
                    return (
                      <button 
