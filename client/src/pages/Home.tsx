@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import Layout from "@/components/Layout";
 import { motion } from "framer-motion";
-import { Zap, BookOpen, BarChart3, Bell, ArrowRight, Quote } from "lucide-react";
+import { Zap, BookOpen, BarChart3, Bell, ArrowRight, Quote, User } from "lucide-react";
 // @ts-ignore
 import logo from "@/assets/logo.png";
 
@@ -27,7 +27,12 @@ export default function Home() {
         <header className="flex justify-between items-start">
           <div className="space-y-1">
             <h1 className="text-3xl font-serif text-stone-900 leading-none">Good Morning,</h1>
-            <p className="text-stone-500 font-sans text-base">You have Class 8 Biology at 9:30 AM.</p>
+            <Link href="/profile">
+               <div className="flex items-center gap-2 cursor-pointer group">
+                  <p className="text-stone-500 font-sans text-base group-hover:text-stone-700 transition-colors">Priya Sharma</p>
+                  <User className="w-4 h-4 text-stone-400 group-hover:text-stone-600" />
+               </div>
+            </Link>
           </div>
           <button className="p-2 -mr-2 text-stone-400 hover:text-stone-600 transition-colors relative">
             <Bell className="w-6 h-6" />
