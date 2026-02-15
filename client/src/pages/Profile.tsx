@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Layout from "@/components/Layout";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, User, Book, School, Wifi, Monitor, Check, ChevronRight, Settings } from "lucide-react";
+import { ArrowLeft, User, Book, School, Wifi, Monitor, Check, ChevronRight, Settings, Users } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Profile() {
@@ -22,6 +22,12 @@ export default function Profile() {
     const updated = current.includes(value)
       ? current.filter(item => item !== value)
       : [...current, value];
+    
+    // Sort classes numerically if the field is classes
+    if (field === "classes") {
+        updated.sort((a, b) => parseInt(a) - parseInt(b));
+    }
+    
     setFormData({ ...formData, [field]: updated });
   };
 
@@ -58,7 +64,7 @@ export default function Profile() {
               <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center border-2 border-white shadow-sm">
                 <User className="w-8 h-8 text-stone-400" />
               </div>
-              <div>
+              <div className="flex-1">
                 {isEditing ? (
                   <input 
                     type="text" 
@@ -92,7 +98,7 @@ export default function Profile() {
           </div>
 
           {/* Context Settings */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             
             {/* Subjects */}
             <section>
@@ -115,6 +121,33 @@ export default function Profile() {
                        } ${!isEditing && !isActive ? 'opacity-50' : ''}`}
                      >
                        {subj}
+                     </button>
+                   )
+                 })}
+               </div>
+            </section>
+
+            {/* Classes Taught - NOW EDITABLE */}
+            <section>
+               <h3 className="font-serif text-lg text-stone-900 mb-3 flex items-center gap-2">
+                 <Users className="w-4 h-4 text-stone-400" />
+                 Classes Taught
+               </h3>
+               <div className="flex flex-wrap gap-2">
+                 {["6", "7", "8", "9", "10", "11", "12"].map((cls) => {
+                   const isActive = formData.classes.includes(cls);
+                   return (
+                     <button 
+                       key={cls}
+                       onClick={() => isEditing && toggleSelection("classes", cls)}
+                       disabled={!isEditing}
+                       className={`w-12 h-12 rounded-full border text-sm font-medium transition-all flex items-center justify-center ${
+                         isActive 
+                           ? "bg-stone-800 text-white border-stone-800 shadow-md scale-105" 
+                           : "bg-white border-stone-200 text-stone-500"
+                       } ${!isEditing && !isActive ? 'opacity-50' : ''}`}
+                     >
+                       {cls}
                      </button>
                    )
                  })}
