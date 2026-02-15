@@ -1,11 +1,22 @@
 import { Link } from "wouter";
 import Layout from "@/components/Layout";
 import { motion } from "framer-motion";
-import { Zap, BookOpen, BarChart3, Bell, ArrowRight, Quote, User } from "lucide-react";
+import { Zap, BookOpen, BarChart3, Bell, ArrowRight, Quote, User, Edit2, Check } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useState } from "react";
 // @ts-ignore
 import logo from "@/assets/logo.png";
 
 export default function Home() {
+  const [upNext, setUpNext] = useState({
+    title: "Cell Structure",
+    desc: "Students often confuse cell walls with membranes. We have a 30s analogy to fix this.",
+    time: "9:30 AM"
+  });
+
+  const [editForm, setEditForm] = useState(upNext);
+  const [isOpen, setIsOpen] = useState(false);
+
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -46,21 +57,74 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-[#2D3339] text-[#FDFCF8] p-6 rounded-2xl shadow-xl relative overflow-hidden group cursor-pointer"
         >
-          <Link href="/prep">
-            <div className="relative z-10">
-              <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-xs font-medium tracking-wide mb-4 text-[#FDFCF8]/90 border border-white/10">
-                Up Next
+          <div className="relative z-10">
+            <div className="flex justify-between items-start mb-4">
+               <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-xs font-medium tracking-wide text-[#FDFCF8]/90 border border-white/10">
+                Up Next • {upNext.time}
               </span>
-              <h2 className="text-2xl font-serif mb-2">Cell Structure</h2>
-              <p className="text-[#FDFCF8]/70 text-sm mb-6 max-w-[80%]">
-                Students often confuse cell walls with membranes. We have a 30s analogy to fix this.
-              </p>
-              
-              <div className="flex items-center gap-2 text-sm font-medium hover:gap-3 transition-all text-white">
-                Review Plan <ArrowRight className="w-4 h-4" />
-              </div>
+              <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogTrigger asChild>
+                   <button className="p-1.5 rounded-full hover:bg-white/10 transition-colors text-white/50 hover:text-white">
+                     <Edit2 className="w-4 h-4" />
+                   </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="font-serif">Update Schedule</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-stone-500">Next Class Topic</label>
+                      <input 
+                        className="w-full p-3 border border-stone-200 rounded-lg" 
+                        value={editForm.title}
+                        onChange={(e) => setEditForm({...editForm, title: e.target.value})}
+                      />
+                    </div>
+                     <div className="space-y-2">
+                      <label className="text-sm font-medium text-stone-500">Insight/Hook</label>
+                      <textarea 
+                        className="w-full p-3 border border-stone-200 rounded-lg" 
+                        value={editForm.desc}
+                        onChange={(e) => setEditForm({...editForm, desc: e.target.value})}
+                      />
+                    </div>
+                     <div className="space-y-2">
+                      <label className="text-sm font-medium text-stone-500">Time</label>
+                      <input 
+                        type="time"
+                        className="w-full p-3 border border-stone-200 rounded-lg" 
+                        value={editForm.time}
+                        onChange={(e) => setEditForm({...editForm, time: e.target.value})}
+                      />
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setUpNext(editForm);
+                        setIsOpen(false);
+                      }}
+                      className="w-full py-3 bg-stone-900 text-white rounded-lg font-medium flex items-center justify-center gap-2"
+                    >
+                      <Check className="w-4 h-4" /> Save Changes
+                    </button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
-          </Link>
+            
+            <Link href="/prep">
+              <div>
+                <h2 className="text-2xl font-serif mb-2">{upNext.title}</h2>
+                <p className="text-[#FDFCF8]/70 text-sm mb-6 max-w-[80%]">
+                  {upNext.desc}
+                </p>
+                
+                <div className="flex items-center gap-2 text-sm font-medium hover:gap-3 transition-all text-white">
+                  Review Plan <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+            </Link>
+          </div>
           
           {/* Subtle Texture */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl opacity-50"></div>
