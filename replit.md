@@ -7,6 +7,8 @@ TeacherOS is a mobile-first AI teacher companion app for Indian classrooms. It h
 - **Reflect** (purple): Post-class journaling
 
 ## Recent Changes
+- 2026-02-15: Added real-time AI crisis support via WebSocket + Gemini streaming on Crisis page
+- 2026-02-15: Added browser SpeechRecognition API for voice input on Crisis page
 - 2026-02-15: Converted all frontend pages from localStorage to real API calls using TanStack Query
 - 2026-02-15: Integrated Replit Auth for authentication (login/logout/session management)
 - 2026-02-15: Created PostgreSQL database schema (users, teacher_profiles, timetable_sessions, reflections)
@@ -25,6 +27,8 @@ TeacherOS is a mobile-first AI teacher companion app for Indian classrooms. It h
 - **Backend**: Express.js with authenticated API routes
 - **Database**: PostgreSQL with Drizzle ORM
 - **Auth**: Replit Auth (server/replit_integrations/auth/)
+- **AI**: Gemini via Replit AI Integrations (no API key needed)
+- **Real-time**: WebSocket server for Crisis mode streaming
 - **Key files**:
   - `shared/schema.ts` - Database schema (users, teacher_profiles, timetable_sessions, reflections)
   - `server/routes.ts` - API endpoints
@@ -33,6 +37,8 @@ TeacherOS is a mobile-first AI teacher companion app for Indian classrooms. It h
   - `client/src/pages/` - Home, Crisis, Prep, Reflect, Profile, Onboarding
   - `client/src/hooks/use-auth.ts` - Auth hook
   - `client/src/components/Layout.tsx` - Shared layout with bottom nav
+
+  - `server/crisis-ws.ts` - WebSocket server for real-time crisis AI support
 
 ## API Endpoints
 - `GET /api/auth/user` - Current user info

@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { storage } from "./storage";
 import { insertTeacherProfileSchema, insertTimetableSessionSchema, insertReflectionSchema } from "@shared/schema";
+import { setupCrisisWebSocket } from "./crisis-ws";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -106,6 +107,8 @@ export async function registerRoutes(
       res.status(500).json({ message: "Failed to save reflection" });
     }
   });
+
+  setupCrisisWebSocket(httpServer);
 
   return httpServer;
 }
