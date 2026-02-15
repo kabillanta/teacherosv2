@@ -1,0 +1,709 @@
+# 🎓 TeacherOS — The AI Teacher Companion
+
+> **One Agent. Three Modes. Voice-First. Built for Indian Classrooms.**
+>
+> *Crisis is the hook. Education quality is the mission.*
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Google_ADK-Agent-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Google ADK" />
+  <img src="https://img.shields.io/badge/Gemini_2.0-Flash-34A853?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
+  <img src="https://img.shields.io/badge/React_Native-Expo-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React Native" />
+  <img src="https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/NCF_2023-Grounded-FF6B35?style=for-the-badge" alt="NCF" />
+</p>
+
+---
+
+## 📋 Table of Contents
+
+- [The Problem](#-the-real-problem)
+- [User Research](#-user-research--who-we-built-for)
+- [The Solution — 3 Modes](#-the-solution--a-teachers-day-cycle)
+- [Why Not Just ChatGPT?](#-why-not-just-chatgpt)
+- [Features — Crisis Mode](#mode-1--crisis-mode--help-me-right-now)
+- [Features — Prep Mode](#mode-2--prep-mode--i-have-30-seconds-before-class)
+- [Features — Reflect Mode](#mode-3--reflect-mode--class-is-over-30-seconds)
+- [Retention & Daily Habit Loop](#-retention--daily-habit-loop)
+- [Architecture](#️-architecture)
+- [Tech Stack](#️-tech-stack)
+- [Project Structure](#-project-structure)
+- [API Endpoints](#-api-endpoints)
+- [Google ADK Agent](#️-google-adk-agent)
+- [NCF Context Injection](#-ncf-context-injection)
+- [Business Model](#-business-model)
+- [Demo Strategy](#-hackathon-demo-strategy-5-min)
+- [Build Priority](#-hackathon-build-priority)
+
+---
+
+## 🎯 The Real Problem
+
+**India has 9.6 million schoolteachers. Most face this reality every single day:**
+
+| Pain Point | The Truth |
+|-----------|-----------|
+| 🏫 **40–60+ students per class** | Western strategies built for 25 kids fail here |
+| 😰 **Zero mentorship** | New teachers are thrown into classrooms alone |
+| ⏱️ **6–8 periods/day** | No time to plan, no time to reflect |
+| 📏 **Curriculum pressure** | Dense CBSE/ICSE/State board syllabi leave no room for innovation |
+| 🧠 **Rote culture vs NCF 2023** | NCF demands competency-based teaching — but teachers have no tools |
+| 😴 **Post-lunch crash** | Periods 5–7 are a battlefield of sleepy, uncooperative students |
+| 🔇 **Unreliable internet** | Any solution MUST have offline fallbacks |
+
+Workshops, training manuals, PD sessions — they all fail in the moment a classroom explodes. Teachers need a mentor that's **always in their pocket, always ready, and never judges.**
+
+---
+
+## 🗣️ User Research — Who We Built For
+
+> *We talked to real teachers. These are their words.*
+
+| Teacher | Quote | Insight |
+|---------|-------|---------|
+| **Priya S.** — CBSE, Delhi, Class 9 Biology | *"A student threw a chair last week. I froze for 10 seconds. By then it was chaos. I needed someone to tell me what to do RIGHT THEN."* | Crisis response must be < 3 seconds |
+| **Ramesh K.** — State Board, TN, Class 6-8 Math | *"I teach 8 periods. I don't eat lunch. Asking me to 'plan better' is insulting — I need 30-second help, not 30-minute workshops."* | Prep Mode MUST be under 30 seconds |
+| **Anitha R.** — ICSE, Bangalore, Class 4-5 English | *"After 3 years I still don't know if I'm getting better. Nobody tells me. I just survive each day."* | Reflect Mode fills a massive emotional gap |
+| **Mohammed F.** — State Board, Hyderabad, Class 10 Science | *"I know what NCF 2023 says. I've read it. But HOW do I actually do competency-based teaching with 55 students and no lab equipment?"* | NCF theory → practical translation is the real need |
+
+**Persona: The Overwhelmed-But-Caring Teacher**
+- 25-45 years old
+- Teaches 6-8 periods daily in classes of 40-60+
+- Wants to be a good teacher but has no support system
+- Carries a smartphone (Android, often offline)
+- Will use an app only if it takes < 30 seconds
+
+---
+
+## 💡 The Solution — A Teacher's Day Cycle
+
+TeacherOS follows a teacher through their entire day — **before, during, and after** class. Not just a crisis tool. Not just a chatbot. A **companion that makes you better over time.**
+
+```
+    ┌──────────────────────────────────────────────────────┐
+    │              A TEACHER'S DAY WITH TEACHEROS           │
+    │                                                       │
+    │   ☀️ MORNING                                          │
+    │   ┌──────────────────┐                                │
+    │   │  🎯 PREP MODE    │  "Class 8 Bio, Cell Structure" │
+    │   │  Before Class    │  → NCF outcomes, hooks,        │
+    │   │  (30 seconds)    │     misconceptions, Bloom's Q  │
+    │   └────────┬─────────┘                                │
+    │            │                                           │
+    │   🏫 IN CLASS                                          │
+    │   ┌────────▼─────────┐                                │
+    │   │  🚨 CRISIS MODE  │  "Students are fighting!"      │
+    │   │  During Class    │  → Instant voice de-escalation │
+    │   │  (Voice-first)   │     TTS reads action aloud     │
+    │   └────────┬─────────┘                                │
+    │            │                                           │
+    │   🌙 AFTER CLASS                                       │
+    │   ┌────────▼─────────┐                                │
+    │   │  📝 REFLECT MODE │  3 taps: Energy? Got it? Chaos?│
+    │   │  After Class     │  → Weekly AI insight:          │
+    │   │  (30 seconds)    │    "Proximity worked 4/4 times"│
+    │   └──────────────────┘                                │
+    └──────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🆚 Why Not Just ChatGPT?
+
+> *This is the #1 question judges will ask. Here's the answer.*
+
+| Feature | ChatGPT / Gemini Chat | TeacherOS |
+|---------|----------------------|------------|
+| **Activation** | Unlock phone → open app → type | **Shake phone** or **one tap** |
+| **Eyes on students?** | ❌ Must read screen | ✅ **TTS reads aloud through earbuds** |
+| **Knows YOUR classroom?** | ❌ Starts fresh every time | ✅ **Profile: board, class size, subject, what failed** |
+| **Learns from you?** | ❌ No memory | ✅ **Tracks ✅/❌ feedback, excludes failed strategies** |
+| **Works offline?** | ❌ Needs internet | ✅ **12 strategies + 12 energizers cached locally** |
+| **NCF 2023 aligned?** | ❌ Generic global advice | ✅ **Grounded in India's curriculum framework** |
+| **Time to help?** | 30-60 seconds (type + wait + read) | **< 3 seconds** (shake → hear) |
+| **Whisper Mode?** | ❌ Must type full sentences | ✅ **Type 2-3 words → full response** |
+| **Growth tracking?** | ❌ No history | ✅ **Weekly insights: "Crises down 33% this week"** |
+
+**Bottom line:** ChatGPT is a search engine. TeacherOS is a **personal mentor that knows you, learns from you, and talks to you when your hands are full.**
+
+---
+
+## ✨ The 3 Modes (Core Features)
+
+### Mode 1: 🚨 Crisis Mode — *"Help me RIGHT NOW"*
+
+The hero feature. When chaos erupts, the teacher doesn't have time to type, read, or think.
+
+#### Activation Methods
+
+| Method | How | When |
+|--------|-----|------|
+| 🔴 **Giant Red Button** | Tap once | Standard activation |
+| 📳 **Shake Phone** | Shake violently (>15 m/s², 2s debounce, haptic confirm) | Panic mode — phone in pocket |
+| 🤫 **Whisper Mode** | Type 2-3 words: `kid crying` | When you CAN'T speak — silent/emotional situations |
+
+#### What the Agent Returns
+
+```json
+{
+  "immediate_action": "Walk to the student. Kneel. Whisper: 'I see you. Take a breath.'",
+  "follow_up": "After class: private check-in. Inform counselor if needed.",
+  "prevention": "Establish a 'feelings corner' with calm-down tools.",
+  "category": "emotional_breakdown"
+}
+```
+
+**`immediate_action`** is spoken aloud via TTS (calm, 0.5× speed). Eyes never leave the classroom.
+
+#### Whisper Mode (Empathy-First AI)
+
+When a teacher **can't speak** — a student is crying, the room is dead silent, or the situation is too sensitive for voice:
+
+| Teacher Types | Agent Responds |
+|--------------|----------------|
+| `kid crying` | *"Walk to the student. Kneel to eye level. Whisper: 'I see you. Take a breath. I'm here.'"* |
+| `fight back row` | *"Stop teaching. Walk silently to the back. Stand between them. Firm: 'Step apart.'"* |
+| `all shouting` | *"Freeze. Stand still. Count 3-2-1 on fingers. Wait for silence."* |
+| `kid won't talk` | *"Don't push. Write a note: 'I'm here when you're ready.' Place on desk."* |
+
+**2-3 words → full empathetic response.** This is what separates TeacherOS from chatbots.
+
+#### Quick Situation Filters (One Tap)
+
+| Filter | What It Solves |
+|--------|---------------|
+| 🔊 **Too Loud** | Whole class noise — needs instant silence |
+| 😈 **One Disruptor** | Single student derailing the lesson |
+| 😴 **Low Energy** | Post-lunch slump — class is dead |
+| 🔄 **Transition Chaos** | Activity switch = pure chaos |
+| ✅ **Finished Early** | Done early — fill time productively |
+
+Each returns **3 curated solutions** with 5 actionable steps.
+
+#### Built-In Arsenal: 12 Strategies + 12 Energizers
+
+**12 Battle-Tested Strategies:**
+
+| Strategy | One-Line |
+|----------|----------|
+| The Stare | Sustained eye contact — non-verbal correction |
+| Proximity | Walk toward noise without stopping teaching |
+| 3-2-1 Reset | Ritualized countdown for absolute silence |
+| Whisper | Private correction — avoids power struggles |
+| The Pause | Strategic silence that forces attention |
+| Hand Signals | Silent communication for common requests |
+| Choice & Consequence | Give students ownership of behavior |
+| Positive Narration | Describe desired behavior, ignore bad |
+| The Redirect | Refocus without calling out |
+| Timer Pressure | Use urgency to eliminate procrastination |
+| Broken Record | Repeat same instruction, no emotion |
+| Strategic Praise | Publicly praise good behavior |
+
+**12 Energizers for Dead Classrooms:**
+
+| Energizer | Duration |
+|-----------|----------|
+| Two Truths & A Lie | 3 min |
+| Think-Pair-Share | 2 min |
+| Stand Up / Sit Down | 2 min |
+| One Word Whip | 1 min |
+| 4 Corners | 3 min |
+| Silent Ball | 3 min |
+| Quiz-Quiz-Trade | 3 min |
+| Whiteboard Race | 5 min |
+| Snowball Fight | 3 min |
+| Exit Ticket | 2 min |
+| Brain Break Stretch | 1 min |
+| Popcorn Reading | 3 min |
+
+All strategies and energizers are **cached locally** — work without internet.
+
+---
+
+### Mode 2: 🎯 Prep Mode — *"I have 30 seconds before class"*
+
+6-8 periods/day. No prep time. Prep Mode gives a **30-second pre-class boost**.
+
+#### How It Works
+
+**Input:** *"Class 8, Biology, Cell Structure, 40 minutes"*
+
+**Agent returns:**
+
+| Section | Example |
+|---------|---------|
+| 🎯 **NCF Learning Outcomes** | *"Students develop inquiry skills around cell organelles (NCF Stage 3)"* |
+| ⚠️ **Common Misconceptions** | *"Cell wall ≠ cell membrane. Analogy: wall = brick boundary, membrane = security guard"* |
+| 🔥 **Engagement Risk** | *"Energy drops at minute 20. Plan an energizer between organelle intro and diagram."* |
+| 💡 **Opening Hook** | *"Show 30-sec time-lapse of cell division. Ask: What just happened?"* |
+
+#### Bloom's Taxonomy Question Generator
+
+Topic in → 3-level questions out:
+
+| Level | Example (Cells) |
+|-------|-----------------|
+| 🟢 **Remember** | "What are the parts of a cell?" |
+| 🟡 **Apply** | "If a cell lost its membrane, what would happen?" |
+| 🔴 **Evaluate** | "Why do plant cells need a wall but animal cells don't?" |
+
+> NCF 2023's biggest complaint: classrooms are stuck at "Remember." This pushes teachers toward higher-order thinking.
+
+#### Micro-Assessment Checks
+
+Quick "did they get it?" techniques:
+
+| Technique | How |
+|-----------|-----|
+| 👍 **Thumbs Up/Down** | Hand gesture for understanding level |
+| 🤔 **Muddiest Point** | Write ONE confusing thing |
+| 📝 **3-2-1** | 3 learned, 2 questions, 1 to remember |
+| ✋ **Fist to Five** | Rate confidence 0-5 |
+
+AI generates **topic-specific prompts** for each.
+
+---
+
+### Mode 3: 📝 Reflect Mode — *"Class is over. 30 seconds."*
+
+The **growth engine**. Teaching doesn't improve without reflection. But teachers have no time. **3 taps + an optional voice note.**
+
+#### Quick Journal (3 Taps)
+
+| Tap | Options |
+|-----|---------|
+| **Energy** | 😴 Low · 😐 OK · 🔥 High |
+| **Understanding** | ❌ Lost · 🟡 Partial · ✅ Got it |
+| **Disruptions** | 0 · 1–2 · 3+ |
+
+Plus optional voice note: *"Cell diagram worked but they confused mitosis with meiosis."*
+
+#### The Smart Feedback Loop
+
+- Mark AI solutions as **✅ Worked** or **❌ Failed**
+- AI explains **why** and suggests alternatives
+- **Failed strategies are auto-excluded** — agent refuses to suggest them again
+
+**Demo moment:** Show the agent saying:
+> *"You marked 'Countdown technique' as failed on Feb 10. I'm suggesting Proximity instead — it worked 4 out of 4 times for you."*
+
+This proves the AI **actually learns**. Judges love this.
+
+#### Weekly AI Insight
+
+*"6 crises this week (down from 9 last week — 33% improvement!). Proximity worked 4/4 times. Energy drops consistently in periods 5-6. Try starting period 5 with a 2-minute Stand Up/Sit Down energizer."*
+
+---
+
+## 🔄 Retention & Daily Habit Loop
+
+> *"Teachers install it during a crisis. But why do they open it tomorrow?"*
+
+**Answer: Morning nudge notifications.**
+
+```
+┌──────────────────────────────────────────────────┐
+│  📱 Notification (7:45 AM)                        │
+│                                                   │
+│  🎓 TeacherOS                                    │
+│  You're teaching Class 8 Biology, Period 3 today. │
+│  Tap for a 30-second prep on Cell Structure.      │
+│                                                   │
+│  [Prep Now]  [Later]                              │
+└──────────────────────────────────────────────────┘
+```
+
+**The habit loop:**
+1. **Morning notification** → Teacher opens Prep Mode (30 sec)
+2. **During class** → Crisis Mode if needed (3 sec)
+3. **After class** → Reflect Mode (30 sec)
+4. **End of week** → AI insight notification → Teacher sees progress
+
+**Result:** App opens **3× per class period** → becomes daily ritual.
+
+Even a **static mock** of this notification in the demo is enough. It shows judges you've thought about retention, not just features.
+
+---
+
+## 🏗️ Architecture
+
+```
+┌───────────────────────────────────────────────────────────────────┐
+│                   REACT NATIVE APP (Expo)                         │
+│                                                                   │
+│  ┌──────────────┐   ┌──────────────┐   ┌───────────────────┐    │
+│  │ 🚨 Crisis    │   │ 🎯 Prep      │   │ 📝 Reflect        │    │
+│  │    Mode      │   │    Mode      │   │    Mode           │    │
+│  └──────┬───────┘   └──────┬───────┘   └──────────┬────────┘    │
+│         │                  │                       │             │
+│  ┌──────┴──────────────────┴───────────────────────┴──────────┐  │
+│  │  STT │ TTS │ Shake │ AsyncStorage │ Offline Fallbacks     │  │
+│  └─────────────────────────┬──────────────────────────────────┘  │
+└─────────────────────────────┼────────────────────────────────────┘
+                              │ HTTPS / REST (JSON)
+                              ▼
+┌───────────────────────────────────────────────────────────────────┐
+│                      FASTAPI GATEWAY                              │
+│                                                                   │
+│  POST /crisis    POST /prep     POST /reflect   POST /feedback   │
+│  POST /bloom     GET  /pulse    GET/PUT /profile GET  /health    │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │               REQUEST ROUTER + PYDANTIC VALIDATION          │ │
+│  └──────────────────────────┬──────────────────────────────────┘ │
+└─────────────────────────────┼────────────────────────────────────┘
+                              │
+                              ▼
+┌───────────────────────────────────────────────────────────────────┐
+│                   GOOGLE ADK AGENT RUNTIME                        │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │                 TeacherOS_agent (root)                      │ │
+│  │                                                              │ │
+│  │  Model: gemini-2.0-flash │ Session State (in-memory)        │ │
+│  │                                                              │ │
+│  │  ┌──────────────────── TOOLS ─────────────────────────────┐ │ │
+│  │  │  🚨 resolve_crisis()    → action + follow-up           │ │ │
+│  │  │  🎯 prep_class()        → outcomes + hooks + risks     │ │ │
+│  │  │  ❓ generate_bloom()     → 3-level questions            │ │ │
+│  │  │  💾 save_feedback()      → persist ✅/❌ to DB          │ │ │
+│  │  │  📊 analyze_patterns()   → weekly insights             │ │ │
+│  │  │  👤 get_teacher_context() → profile + history          │ │ │
+│  │  └─────────────────────────────────────────────────────────┘ │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+│  ┌──────────────────┐        ┌─────────────────────────────┐    │
+│  │  NCF 2023 Data   │        │  SQLite → PostgreSQL        │    │
+│  │  (Context Inject) │        │  • teacher_profiles         │    │
+│  │  pedagogy.txt    │        │  • crisis_logs              │    │
+│  │  assessment.txt  │        │  • strategy_feedback        │    │
+│  │  management.txt  │        │  • reflect_journals         │    │
+│  │  competency.txt  │        │  • session_history          │    │
+│  └──────────────────┘        └─────────────────────────────┘    │
+└───────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology | Why This |
+|-------|-----------|----------|
+| **Mobile App** | React Native + Expo | Cross-platform, hot reload, Expo ecosystem |
+| **Navigation** | Expo Router (tabs) | File-based, 3 tabs + profile |
+| **Voice Input** | `@react-native-voice/voice` | Native STT for crisis mic |
+| **Voice Output** | `expo-speech` (TTS) | Calm 0.5× speed readback |
+| **Shake Detection** | `expo-sensors` (accelerometer) | Panic-mode activation |
+| **Local Storage** | AsyncStorage | Profile, favorites, offline fallbacks |
+| **Backend** | Python FastAPI | Async, auto OpenAPI docs, Pydantic |
+| **Agent Framework** | Google ADK (`google-adk`) | Tool-calling, session memory, Gemini-native |
+| **LLM** | Gemini 2.0 Flash | Fast (<2s), cheap, structured JSON output |
+| **NCF Grounding** | Context injection (text chunks) | No vector DB — Gemini's 1M token window |
+| **Database** | SQLite (dev) → PostgreSQL (prod) | Feedback, journals, crisis logs |
+| **Auth** | Firebase Auth (anonymous) | Zero-friction onboarding |
+| **Notifications** | Expo Notifications | Morning prep nudge habit loop |
+
+---
+
+## 📂 Project Structure
+
+```
+teacherOS/
+│
+├── frontend/                             # React Native (Expo)
+│   ├── app/
+│   │   ├── (tabs)/
+│   │   │   ├── _layout.tsx              # Tab navigator (3 tabs)
+│   │   │   ├── crisis.tsx               # 🚨 Crisis Mode
+│   │   │   ├── prep.tsx                 # 🎯 Prep Mode
+│   │   │   └── reflect.tsx              # 📝 Reflect Mode
+│   │   ├── profile.tsx                  # 👤 Teacher Profile
+│   │   ├── onboarding.tsx               # First-time setup
+│   │   └── _layout.tsx                  # Root layout
+│   │
+│   ├── components/
+│   │   ├── CrisisButton.tsx             # Giant red animated button
+│   │   ├── VoiceInput.tsx               # Mic orb + STT
+│   │   ├── WhisperInput.tsx             # 2-3 word text input
+│   │   ├── ResponseCard.tsx             # AI crisis response display
+│   │   ├── QuickFilters.tsx             # Situation filter chips
+│   │   ├── StrategyCard.tsx             # Individual strategy card
+│   │   ├── PrepCard.tsx                 # Prep mode output display
+│   │   ├── BloomQuestions.tsx           # 3-level question display
+│   │   ├── ReflectJournal.tsx           # 3-tap journal widget
+│   │   └── PulseChart.tsx              # Weekly trend chart
+│   │
+│   ├── data/
+│   │   ├── strategies.ts               # 12 strategies (offline)
+│   │   ├── energizers.ts               # 12 energizers (offline)
+│   │   ├── quickFilters.ts             # 5 filter categories
+│   │   └── fallbackResponses.ts        # Offline crisis fallbacks
+│   │
+│   ├── services/
+│   │   ├── api.ts                       # Axios client + all endpoints
+│   │   ├── speech.ts                    # STT + TTS wrapper
+│   │   ├── notifications.ts            # Morning prep nudge
+│   │   └── storage.ts                   # AsyncStorage helpers
+│   │
+│   ├── constants/
+│   │   └── theme.ts                     # Colors, fonts, sizing
+│   ├── app.json
+│   └── package.json
+│
+├── backend/
+│   ├── app/
+│   │   ├── main.py                      # FastAPI server + all routes
+│   │   ├── agent.py                     # Google ADK agent definition
+│   │   ├── tools.py                     # All agent tools
+│   │   ├── models.py                    # Pydantic request/response schemas
+│   │   └── database.py                  # SQLAlchemy + DB models
+│   │
+│   ├── ncf_data/                        # NCF 2023 text chunks
+│   │   ├── pedagogy_approaches.txt
+│   │   ├── assessment_practices.txt
+│   │   ├── classroom_management.txt
+│   │   ├── stage_wise_guidelines.txt
+│   │   └── competency_framework.txt
+│   │
+│   ├── requirements.txt
+│   ├── .env.example
+│   └── Dockerfile
+│
+├── README.md
+└── LICENSE                               # AGPL-3.0
+```
+
+---
+
+## 🔌 API Endpoints
+
+| Endpoint | Method | Mode | Description |
+|----------|--------|------|-------------|
+| `/crisis` | POST | 🚨 | De-escalation: action + follow-up + prevention |
+| `/quick_situation` | POST | 🚨 | 3 curated solutions for a situation type |
+| `/enhance_strategy` | POST | 🚨 | Personalize a strategy for teacher's context |
+| `/generate_energizer` | POST | 🚨 | Custom energizer for current class |
+| `/prep` | POST | 🎯 | NCF outcomes + misconceptions + hooks |
+| `/bloom` | POST | 🎯 | Bloom's taxonomy questions (3 levels) |
+| `/reflect` | POST | 📝 | Save 3-tap journal + voice note |
+| `/feedback` | POST | 📝 | Worked/Failed + AI analysis |
+| `/pulse/{teacher_id}` | GET | 📝 | Weekly trends + pattern insights |
+| `/profile/{teacher_id}` | GET/PUT | — | Teacher profile CRUD |
+| `/health` | GET | — | Server health |
+
+---
+
+## ⚙️ Google ADK Agent
+
+```python
+from google.adk.agents import Agent
+
+TeacherOS_agent = Agent(
+    name="teacherOS",
+    model="gemini-2.0-flash",
+    description="AI teaching mentor for Indian classroom teachers",
+    instruction="""
+    You are TeacherOS Assistant — an expert Indian classroom mentor with
+    30 years of experience across CBSE, ICSE, and State boards.
+
+    You serve teachers in 3 modes:
+
+    CRISIS MODE — When a teacher faces classroom disruption:
+    - Provide immediate_action (≤15 words, will be spoken aloud via TTS)
+    - Provide follow_up steps for after the crisis passes
+    - Provide prevention advice to stop recurrence
+    - Support WHISPER MODE: 2-3 word inputs like "kid crying" → full empathetic response
+    - NEVER suggest yelling, physical punishment, or humiliation
+    - Prioritize non-verbal techniques + student safety
+
+    PREP MODE — When a teacher is about to start a class:
+    - Generate NCF-2023-aligned learning outcomes
+    - Flag common student misconceptions for the topic
+    - Warn about engagement risk points (when energy will drop)
+    - Suggest an opening hook that creates curiosity
+    - Generate Bloom's taxonomy questions at 3 cognitive levels
+
+    REFLECT MODE — When a teacher finishes a class:
+    - Analyze feedback: why a strategy worked or failed
+    - Identify patterns across the teacher's history
+    - Generate weekly insights and personalized tips
+    - Auto-exclude failed strategies from future recommendations
+
+    Context rules:
+    - Be culturally aware of Indian classroom realities
+    - All strategies must work for 40-60+ student classes
+    - Align pedagogy with NCF 2023 (context data provided)
+    - Consider teacher's board, medium, class size, subject
+    - Load teacher's profile and history before every response
+    """,
+    tools=[
+        resolve_crisis,
+        prep_class,
+        generate_bloom_questions,
+        save_feedback,
+        analyze_patterns,
+        get_teacher_context,
+    ],
+)
+```
+
+---
+
+## 📚 NCF Context Injection
+
+> *Not a vector DB. Not traditional RAG. Something smarter for this use case.*
+
+We pre-process NCF 2023 (~600 pages) into **topic-tagged text chunks** and inject relevant sections into the agent's context window using Gemini's **1M token capacity**.
+
+| Component | Detail |
+|-----------|--------|
+| **Source** | NCF 2023 PDF, manually chunked by topic |
+| **Storage** | `backend/ncf_data/` — plain `.txt` files |
+| **Retrieval** | Keyword/tag matching per request type |
+| **Injection** | Loaded into Gemini's context at inference time |
+
+**Why not full RAG?** For a 600-page document with clear topic boundaries, keyword matching + large context windows **outperforms** complex embedding pipelines. No vector DB, no embedding model, no infrastructure overhead. This is an intentional architectural decision — simpler is faster for hackathons AND for production.
+
+**Files:**
+
+| File | Content |
+|------|---------|
+| `pedagogy_approaches.txt` | Teaching methodologies recommended by NCF |
+| `assessment_practices.txt` | Formative & summative assessment guidelines |
+| `classroom_management.txt` | NCF's classroom environment recommendations |
+| `stage_wise_guidelines.txt` | Foundational / Preparatory / Middle / Secondary |
+| `competency_framework.txt` | Learning outcomes & competencies by subject |
+
+---
+
+## 💰 Business Model
+
+| Tier | Price | What You Get |
+|------|-------|-------------|
+| **Free** | ₹0 | Crisis Mode (unlimited) + 3 preps/day + basic Reflect |
+| **Pro** | ₹99/month | Unlimited preps + full Reflect + weekly AI insights + export PDF reports |
+| **School License** | ₹499/month/school | Admin dashboard: aggregate teacher wellness, strategy effectiveness, crisis trends |
+| **Government Pilot** | Custom | Sell to state education departments as **NCF 2023 adoption toolkit** |
+
+**Why this works:**
+- Crisis Mode is **always free** — it's the hook that gets installs
+- Prep Mode limit creates natural upgrade pressure
+- School License sells to **principals**, not teachers (different buyer)
+- Government pilot is the **big money play** — NCF 2023 is policy, and they need adoption tools
+
+---
+
+## 🎤 Hackathon Demo Strategy (5 min)
+
+### The Flow
+
+| Time | What | Judge Impact |
+|------|------|-------------|
+| 0:00–0:30 | **Problem** — *"9.6M Indian teachers. Zero real-time AI support."* + teacher quote | Sets urgency |
+| 0:30–1:30 | **Live Demo: Crisis Mode** — Shake phone → "Students fighting" → Hear TTS | 🔥 Wow factor |
+| 1:30–2:00 | **Whisper Mode** — Type `kid crying` → empathetic response | 😢 Emotional impact |
+| 2:00–3:00 | **Live Demo: Prep Mode** — "Class 8 Bio, Cells" → NCF outcomes + Bloom's Q | Shows depth |
+| 3:00–3:30 | **Reflect Demo** — 3-tap journal + mock weekly insight showing trends | Growth loop proof |
+| 3:30–4:00 | **"Why not ChatGPT?"** slide — comparison table | Kills the #1 objection |
+| 4:00–4:30 | **Architecture** — Single ADK agent + 6 tools + NCF context injection | Technical credibility |
+| 4:30–5:00 | **Close** — *"Crisis is the hook. Education quality is the mission."* | Memorable tagline |
+
+### Demo Safety Net
+
+| Risk | Mitigation |
+|------|-----------|
+| STT fails (noisy room) | **Pre-recorded voice demo video** as backup |
+| STT fails (on stage) | Mic tap sends **hardcoded transcript** if STT returns empty |
+| API is slow | Mock responses cached locally — instant fallback |
+| Shake doesn't trigger | Text input always visible as backup |
+
+---
+
+## 👤 Teacher Profile
+
+| Field | Options |
+|-------|---------|
+| Name | Free text |
+| Board | CBSE, ICSE, State Board, IB, Other |
+| Medium | English, Hindi, Regional Language |
+| Grade Levels | Primary (1-5), Middle (6-8), High (9-10), Senior (11-12) |
+| Class Size | Numeric (default: 45) |
+| Subjects | Math, Science, English, Social Studies, Hindi, Computer, Art, PE |
+| Resources | Whiteboard, Projector, Timer, Flashcards, Prizes, Open Space |
+| Environment | Traditional, Lab, Computer Lab, Outdoor, Large Hall, Small Room |
+| What Works | Auto-tracked from ✅ feedback |
+| What Fails | Auto-tracked from ❌ (agent refuses these) |
+
+---
+
+## 🎨 Design Philosophy
+
+### For Crisis Moments
+| Principle | Implementation |
+|-----------|---------------|
+| Giant tap targets | Trembling hands can still hit buttons |
+| Voice-first UX | Eyes stay on students, not screen |
+| Calm TTS (0.5× speed) | Teacher processes while maintaining presence |
+| Single-purpose screens | Zero cognitive overhead |
+| Offline fallbacks | Works when internet fails |
+
+### For Indian Context
+| Principle | Implementation |
+|-----------|---------------|
+| 60-student strategies | Every tactic tested for large classes |
+| Board-aware | CBSE/ICSE/State board differences matter |
+| NCF-grounded | All advice cites curriculum framework |
+| Hindi-ready architecture | Profile supports medium of instruction |
+| Low-bandwidth JSON | No heavy media, works on 2G |
+
+### Visual Identity
+| Element | Value |
+|---------|-------|
+| Primary | `#1A1A1A` (Warm charcoal) |
+| Crisis Accent | `#E63946` (Urgent red) |
+| Prep Accent | `#457B9D` (Calm blue) |
+| Reflect Accent | `#2A9D8F` (Growth teal) |
+| Background | `#FAFAFA` (Soft off-white) |
+| Typography | Inter (body), Outfit (headings) |
+
+---
+
+## ⚡ Hackathon Build Priority
+
+| Priority | Task | Effort | Owner |
+|----------|------|--------|-------|
+| 🔴 P0 | Backend: ADK agent + `resolve_crisis` + `prep_class` tools | 3-4 hrs | Backend |
+| 🔴 P0 | Backend: `/crisis` + `/prep` + `/feedback` endpoints | 2 hrs | Backend |
+| 🔴 P0 | Frontend: Crisis tab — button + mic + Whisper + TTS + response | 3-4 hrs | Frontend |
+| 🔴 P0 | Frontend: Prep tab — input + prep card + Bloom's display | 3 hrs | Frontend |
+| 🟡 P1 | Frontend: Reflect tab — 3-tap journal + pulse chart | 2-3 hrs | Frontend |
+| 🟡 P1 | Backend: `/reflect` + `/pulse` endpoints + DB persistence | 2 hrs | Backend |
+| 🟡 P1 | NCF text chunks loaded into agent context | 1 hr | Backend |
+| 🟡 P1 | 12 strategies + 12 energizers (offline data) | 1 hr | Frontend |
+| 🟢 P2 | Profile setup + onboarding flow | 1-2 hrs | Frontend |
+| 🟢 P2 | Shake-to-activate + haptic feedback | 1 hr | Frontend |
+| 🟢 P2 | Morning nudge notification | 1 hr | Frontend |
+| 🟢 P2 | Firebase anonymous auth | 1 hr | Full-stack |
+| 🟢 P2 | Demo safety net (hardcoded fallbacks + backup video) | 1 hr | Both |
+
+**Total MVP: ~14-16 hrs** (2-person team)
+**Demo-ready in 10 hrs** → Crisis + Prep live, Reflect mocked
+
+---
+
+## 🏁 To Start Building
+
+1. ✅ Approve this master plan
+2. Scaffold Expo project: `npx create-expo-app@latest ./frontend`
+3. Scaffold FastAPI backend with Google ADK
+4. Get Gemini API key → `GOOGLE_API_KEY` in `.env`
+5. `pip install google-adk fastapi uvicorn sqlalchemy python-dotenv`
+6. Prepare NCF 2023 text chunks in `backend/ncf_data/`
+7. Record demo backup video before presentation day
+
+---
+
+<p align="center">
+  <b>Built with ❤️ for Indian educators</b><br>
+  <i>Because every teacher deserves a mentor in their pocket.</i><br><br>
+  <b>Crisis is the hook. Education quality is the mission.</b>
+</p>
